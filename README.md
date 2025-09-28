@@ -46,7 +46,7 @@ body {
 
 <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl space-y-6 md:p-0">
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
-        <img src="https://drive.google.com/uc?id=1cGwwqA1h1z9G_s5l8DM9qkV9XkdYF--6" 
+        <img src="https://1drv.ms/i/c/a0fef2d8f51f3b5f/EZQ819WJhZZLj5MEWcs1jSABSb3UOhumPZCGgXp1EL5lEQ?e=TbBERh" 
              alt="Logo Massa Nostra" 
              class="w-40 h-40 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
@@ -187,7 +187,6 @@ body {
     const MENU = {
         massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
-        // Acompanhamentos - O item "Queijo" foi removido daqui
         acompanhamentos: [
             "Alho", "Alho Frito", "Azeitona", "Bacon", "Brócolis",
             "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
@@ -195,7 +194,6 @@ body {
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
         ],
-        // Novo: Opções de Queijo
         queijos: ["Parmesão Ralado", "Muçarela Ralada"],
         acompanhamentosPremium: {
             'Camarão': 10.00
@@ -225,7 +223,6 @@ body {
     const massaOptionsDiv = document.getElementById('massa-options');
     const molhoOptionsDiv = document.getElementById('molho-options');
     const acompOptionsDiv = document.getElementById('acomp-options');
-    // Novo: Opções de Queijo
     const queijoOptionsDiv = document.getElementById('queijo-options'); 
     const acompCounter = document.getElementById('acomp-counter');
     const itemPriceDisplay = document.getElementById('item-price-display');
@@ -247,7 +244,6 @@ body {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
-            // Força a primeira opção de Queijo a ser checked por ser obrigatória
             const isQueijoOption = name === 'queijo';
             const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
@@ -275,12 +271,10 @@ body {
         `).join('');
     }
 
-    // NOVO: Função para renderizar o queijo
     function renderQueijo() {
         renderOptions(queijoOptionsDiv, 'queijo', MENU.queijos, 'radio', MENU.queijos[0]);
     }
     
-    // ATUALIZADO: Função para renderizar bebidas com input de quantidade
     function renderBebidas() {
         bebidasOptionsDiv.innerHTML = MENU.bebidas.opcoes.map(bebida => {
             const id = `qtd-${bebida.toLowerCase().replace(/\s/g, '-')}`;
@@ -298,23 +292,19 @@ body {
     }
 
     function setupUI() {
-        // Renderiza as seções do Prato
         renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
         renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio');
         renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio');
         renderAcompanhamentos();
-        renderQueijo(); // Novo!
+        renderQueijo(); 
 
-        // Renderiza as bebidas com campo de quantidade
         renderBebidas();
 
-        // Adiciona Listeners
         sizeOptionsDiv.addEventListener('change', updateLimitAndPrice);
         acompOptionsDiv.addEventListener('change', updateAcompCount);
         document.querySelector('input[name="acompPremium"]').addEventListener('change', updateItemPrice);
         deliveryFeeRadios.forEach(radio => radio.addEventListener('change', updateFinalSummary));
 
-        // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
         renderCart(); 
@@ -398,7 +388,7 @@ body {
         const sizeRadio = document.querySelector('input[name="size"]:checked');
         const massaRadio = document.querySelector('input[name="massa"]:checked');
         const molhoRadio = document.querySelector('input[name="molho"]:checked');
-        const queijoRadio = document.querySelector('input[name="queijo"]:checked'); // Novo
+        const queijoRadio = document.querySelector('input[name="queijo"]:checked');
         const acompCheckboxes = document.querySelectorAll('input[name="acomp"]:checked');
         const camarãoCheckbox = document.querySelector('input[name="acompPremium"][value="Camarão"]');
         
@@ -417,7 +407,7 @@ body {
             price: currentItemPrice,
             massa: massaRadio.value,
             molho: molhoRadio.value,
-            queijo: queijoRadio.value, // Novo
+            queijo: queijoRadio.value,
             acompanhamentos: Array.from(acompCheckboxes).map(cb => cb.value),
             premium: camarão,
             obs: document.getElementById('obs').value.trim()
@@ -445,11 +435,9 @@ body {
     }
     
     function resetForm() {
-        // Reset do Prato
         document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
-             // Força a seleção da primeira opção de queijo ao resetar, pois é obrigatório
              r.checked = index === 0; 
         });
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
@@ -487,7 +475,8 @@ body {
                         </button>
                     </div>
                     <p class="text-sm text-gray-600">Molho: ${item.molho}</p>
-                    <p class="text-sm font-bold text-red-500">Queijo: ${item.queijo}</p> <p class="text-sm text-gray-600">Acompanhamentos Comuns: ${acompList}</p>
+                    <p class="text-sm font-bold text-red-500">Queijo: ${item.queijo}</p> 
+                    <p class="text-sm text-gray-600">Acompanhamentos Comuns: ${acompList}</p>
                     ${camarãoText} <p class="text-sm text-gray-600 italic">Obs: ${item.obs || 'Nenhuma'}</p>
                     <p class="text-lg font-extrabold text-green-700 text-right">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                 `;
@@ -614,7 +603,7 @@ body {
             message += `\n*PRATO #${index + 1} (${item.size}):*\n`;
             message += `  Massa: ${item.massa}\n`;
             message += `  Molho: ${item.molho}\n`;
-            message += `  Queijo: *${item.queijo}* (Incluso)\n`; // Novo: Queijo
+            message += `  Queijo: *${item.queijo}* (Incluso)\n`; 
             message += `  Acompanhamentos Comuns: ${acompText}`;
             message += `${camarãoText}\n`;
             message += `  Obs: ${item.obs || 'Nenhuma'}\n`;
@@ -706,3 +695,4 @@ body {
     
 </script>
 </body>
+</html>
