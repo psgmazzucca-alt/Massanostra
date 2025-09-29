@@ -40,6 +40,62 @@ body {
 .cheese-option {
     @apply p-3 bg-red-100 border border-red-300 rounded-lg shadow-inner;
 }
+/* Novo estilo para grid de massas/molhos */
+#massa-options, #molho-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+/* Novo estilo para grid de acompanhamentos */
+#acomp-options {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+}
+/* Ajuste de layout para opções com imagem (macarrão/molho/acompanhamento) */
+.acomp-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 8px !important; /* Ajuste para caber melhor */
+}
+.acomp-option input {
+    order: 3; /* Move o checkbox para baixo */
+    margin-top: 5px;
+}
+.acomp-option .font-medium {
+    order: 2; /* Move a label para o meio */
+    margin-left: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.acomp-option img {
+    order: 1; /* Move a imagem para cima */
+    margin-right: 0 !important;
+    margin-bottom: 4px;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 9999px !important; /* Circular */
+}
+
+/* Reverte o layout para Tamanhos e Queijos, que não usam imagem assim */
+#size-options .acomp-option, #queijo-options .acomp-option {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    padding: 12px !important;
+}
+#size-options .acomp-option input, #queijo-options .acomp-option input {
+    order: 1;
+    margin-top: 0;
+}
+#size-options .acomp-option .font-medium, #queijo-options .acomp-option .font-medium {
+    order: 2;
+    margin-left: 8px !important;
+    flex-direction: row;
+}
 </style>
 </head>
 <body class="min-h-screen p-4 flex justify-center">
@@ -208,14 +264,40 @@ body {
 <script>
     // --- DADOS DO CARDÁPIO (FONTE ÚNICA DE VERDADE) ---
     const MENU = {
-        massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
-        molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
+        // ATUALIZADO COM IMAGENS (PLACEHOLDERS)
+        massas: [
+            { nome: "Penne", img: "https://via.placeholder.com/60/FFD500/000000?text=Penne" },
+            { nome: "Spaguetti", img: "https://via.placeholder.com/60/FFD500/000000?text=Spag" },
+            { nome: "Parafuso", img: "https://via.placeholder.com/60/FFD500/000000?text=Par" },
+            { nome: "Fetutini", img: "https://via.placeholder.com/60/FFD500/000000?text=Fetu" }
+        ],
+        molhos: [
+            { nome: "Bolonhesa", img: "https://via.placeholder.com/60/8B0000/FFFFFF?text=Bolo" },
+            { nome: "Branco", img: "https://via.placeholder.com/60/FFFFFF/333333?text=Bco" },
+            { nome: "Rosé", img: "https://via.placeholder.com/60/FFB6C1/000000?text=Rosé" },
+            { nome: "Sugo", img: "https://via.placeholder.com/60/FF4500/FFFFFF?text=Sugo" }
+        ],
         acompanhamentos: [
-            "Alho", "Alho Frito", "Azeitona", "Bacon", "Brócolis",
-            "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
-            "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
-            "Presunto", "Salsicha", "Tomate", "Tomate Seco",
-            "Uva Passa"
+            { nome: "Alho", img: "https://via.placeholder.com/60/D3D3D3/000000?text=Alho" },
+            { nome: "Alho Frito", img: "https://via.placeholder.com/60/D2B48C/000000?text=AF" },
+            { nome: "Azeitona", img: "https://via.placeholder.com/60/006400/FFFFFF?text=Azei" },
+            { nome: "Bacon", img: "https://via.placeholder.com/60/A0522D/FFFFFF?text=Bacon" },
+            { nome: "Brócolis", img: "https://via.placeholder.com/60/008000/FFFFFF?text=Broc" },
+            { nome: "Calabresa", img: "https://via.placeholder.com/60/8B0000/FFFFFF?text=Cala" },
+            { nome: "Catupiry", img: "https://via.placeholder.com/60/F0F8FF/000000?text=Catu" },
+            { nome: "Cebola", img: "https://via.placeholder.com/60/C0C0C0/000000?text=Ceb" },
+            { nome: "Cheddar", img: "https://via.placeholder.com/60/FF8C00/000000?text=Ched" },
+            { nome: "Champignon", img: "https://via.placeholder.com/60/D2B48C/000000?text=Cham" },
+            { nome: "Ervilha", img: "https://via.placeholder.com/60/3CB371/FFFFFF?text=Erv" },
+            { nome: "Frango", img: "https://via.placeholder.com/60/FFD700/000000?text=Fran" },
+            { nome: "Milho", img: "https://via.placeholder.com/60/FFFF00/000000?text=Milh" },
+            { nome: "Palmito", img: "https://via.placeholder.com/60/F5F5DC/000000?text=Palm" },
+            { nome: "Pimentão", img: "https://via.placeholder.com/60/FF0000/FFFFFF?text=Pime" },
+            { nome: "Presunto", img: "https://via.placeholder.com/60/FA8072/000000?text=Pres" },
+            { nome: "Salsicha", img: "https://via.placeholder.com/60/FF6347/FFFFFF?text=Sals" },
+            { nome: "Tomate", img: "https://via.placeholder.com/60/DC143C/FFFFFF?text=Tom" },
+            { nome: "Tomate Seco", img: "https://via.placeholder.com/60/8B0000/FFFFFF?text=TS" },
+            { nome: "Uva Passa", img: "https://via.placeholder.com/60/800080/FFFFFF?text=Uva" }
         ],
         queijos: ["Parmesão Ralado", "Muçarela Ralada"],
         acompanhamentosPremium: {
@@ -231,9 +313,7 @@ body {
             volume: "350ml"
         },
         whatsappNumber: "5517997381858",
-        // CHAVE PIX (ATUALIZADO)
         pixKey: "41756000867",
-        // NOME DO TITULAR (NOVO)
         pixName: "SUÉLEM CRISTINA MAESTRE MAZZUCCA"
     };
 
@@ -262,13 +342,12 @@ body {
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
     
-    // NOVO: Referências do PIX (ATUALIZADAS)
     const paymentMethodSelect = document.getElementById('payment-method');
     const pixInfoDiv = document.getElementById('pix-info');
     const pixNumberDisplay = document.getElementById('pix-number');
-    const pixNameDisplay = document.getElementById('pix-name'); // NOVO: Referência ao nome
+    const pixNameDisplay = document.getElementById('pix-name');
 
-    // --- FUNÇÕES DE MODAL ---
+    // --- FUNÇÕES DE MODAL (INALTERADAS) ---
     function showModal(message, colorClass = 'bg-gray-500') {
         const modal = document.getElementById('custom-modal');
         const modalContent = document.getElementById('modal-content');
@@ -309,31 +388,45 @@ body {
         document.getElementById('modal-content').classList.add('scale-95');
     }
 
-    // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL ---
+    // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL (ATUALIZADA) ---
 
     function renderOptions(container, name, options, type = 'radio', checkedValue = null, isSizeOption = false) {
+        // Verifica se a opção é um objeto (com nome e img)
+        const isObjectOption = !isSizeOption && Array.isArray(options) && options.length > 0 && typeof options[0] === 'object';
+
         container.innerHTML = options.map((option, index) => {
-            const value = isSizeOption ? option.id : option;
-            let labelText = isSizeOption 
+            const value = isObjectOption ? option.nome : (isSizeOption ? option.id : option);
+            const labelText = isObjectOption ? option.nome : (isSizeOption 
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
-                : option;
+                : option);
+            const imageUrl = isObjectOption ? option.img : null;
             
             const isQueijoOption = name === 'queijo';
             const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
+            // Adiciona a imagem e ajusta o layout se for uma opção com imagem
+            const imageHtml = imageUrl ? `<img src="${imageUrl}" alt="${labelText}" class="w-10 h-10 object-cover rounded mr-2 border border-gray-200">` : '';
+            const layoutClasses = isObjectOption ? 'flex items-center p-3' : 'flex items-center p-3'; // Mantém o estilo base
+            // Se for um item com imagem, usamos uma estrutura de coluna no CSS (veja a tag <style>)
+            const innerContentClasses = isObjectOption ? '' : ''; // O estilo de coluna é aplicado no CSS
+
             return `
-                <label class="flex items-center p-3 bg-white rounded-lg shadow-md hover:bg-red-50 transition duration-150 flex-1 cursor-pointer acomp-option">
+                <label class="${layoutClasses} bg-white rounded-lg shadow-md hover:bg-red-50 transition duration-150 flex-1 cursor-pointer acomp-option">
                     <input type="${type}" name="${name}" value="${value}" 
                         class="${type === 'radio' ? 'form-radio text-red-600' : 'form-checkbox text-red-600'}"
                         ${isChecked ? 'checked' : ''}>
-                    <span class="ml-2 font-medium">${labelText}</span>
+                    
+                    <span class="ml-2 font-medium ${innerContentClasses}">
+                        ${imageHtml}
+                        ${labelText}
+                    </span>
                 </label>
             `;
         }).join('');
     }
     
     function renderAcompanhamentos() {
-        MENU.acompanhamentos.sort((a, b) => a.localeCompare(b));
+        // Agora, MENU.acompanhamentos já é um array de objetos
         renderOptions(acompOptionsDiv, 'acomp', MENU.acompanhamentos, 'checkbox');
         
         const premiumOptionsDiv = document.getElementById('acomp-premium-options');
@@ -365,10 +458,9 @@ body {
         }).join('');
     }
 
-    // NOVO: Função para manipular a mudança do PIX (ATUALIZADA)
     function handlePaymentChange() {
         if (paymentMethodSelect.value === 'Pix') {
-            pixNameDisplay.textContent = MENU.pixName; // Adiciona o nome
+            pixNameDisplay.textContent = MENU.pixName; 
             pixNumberDisplay.textContent = MENU.pixKey;
             pixInfoDiv.classList.remove('hidden');
         } else {
@@ -389,17 +481,16 @@ body {
         document.querySelector('input[name="acompPremium"]').addEventListener('change', updateItemPrice);
         deliveryFeeRadios.forEach(radio => radio.addEventListener('change', updateFinalSummary));
         
-        // NOVO: Adiciona listener para a mudança do método de pagamento
         paymentMethodSelect.addEventListener('change', handlePaymentChange);
 
         updateLimitAndPrice();
         updateBebidasTotal();
         renderCart();
         
-        // NOVO: Inicializa o display do PIX 
         handlePaymentChange();
     }
-
+    // ... (O restante das funções de update, getFormData, addToCart, renderCart, etc. permanecem inalteradas) ...
+    
     function updateLimitAndPrice() {
         const selectedSizeId = document.querySelector('input[name="size"]:checked').value;
         const selectedSize = MENU.tamanhos.find(t => t.id === selectedSizeId);
@@ -486,6 +577,11 @@ body {
             return null;
         }
 
+        if (selectedAcompanhamentos > maxAcompanhamentos) {
+             showModal(`Você selecionou ${selectedAcompanhamentos} acompanhamentos, mas o máximo para o tamanho é ${maxAcompanhamentos}. Por favor, ajuste sua seleção.`, 'bg-red-500');
+            return null;
+        }
+
         const camarão = camarãoCheckbox && camarãoCheckbox.checked ? {
             name: camarãoCheckbox.value,
             cost: premiumPrice
@@ -524,15 +620,17 @@ body {
     }
     
     function resetForm() {
-        document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
-        document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
-        document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
-             r.checked = index === 0; 
-        });
+        // Reset Massa, Molho e Queijo para a primeira opção (ou desmarcar)
+        document.querySelectorAll('input[name="massa"]').forEach((r, index) => { r.checked = index === 0; });
+        document.querySelectorAll('input[name="molho"]').forEach((r, index) => { r.checked = index === 0; });
+        document.querySelectorAll('input[name="queijo"]').forEach((r, index) => { r.checked = index === 0; });
+
+        // Desmarcar Acompanhamentos
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
         document.querySelectorAll('input[name="acompPremium"]').forEach(cb => cb.checked = false); 
         document.getElementById('obs').value = '';
 
+        // Reset Tamanho e limites
         document.querySelector('input[name="size"][value="P"]').checked = true;
         updateLimitAndPrice(); 
     }
@@ -719,9 +817,9 @@ body {
         message += `Referência: ${referencia || 'Sem referência'}\n`;
         message += `Pagamento: ${paymentMethod}\n`;
         
-        // Adiciona PIX à mensagem se for o método selecionado (ATUALIZADO)
+        // Adiciona PIX à mensagem se for o método selecionado 
         if (paymentMethod === 'Pix') {
-             message += `*Titular PIX:* ${MENU.pixName}\n`; // Adiciona nome
+             message += `*Titular PIX:* ${MENU.pixName}\n`; 
              message += `*CHAVE PIX (CPF):* ${MENU.pixKey}\n`;
         }
         
