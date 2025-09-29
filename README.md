@@ -164,6 +164,12 @@ body {
                 </select>
             </div>
             
+            <div id="pix-info" class="p-3 bg-green-100 border border-green-300 rounded-lg shadow-md hidden">
+                <p class="font-bold text-green-800">PIX Selecionado!</p>
+                <p class="text-sm text-gray-700">Titular: <span id="pix-name" class="font-extrabold text-green-900"></span></p>
+                <p class="text-sm text-gray-700">Chave PIX (CPF): <span id="pix-number" class="font-extrabold text-green-900"></span></p>
+                <p class="text-xs text-gray-500 mt-1">Lembre-se: O pagamento via PIX deve ser confirmado no WhatsApp.</p>
+            </div>
             <div class="mt-6 p-4 bg-red-100 rounded-lg shadow-inner">
                 <p class="text-lg font-bold text-red-800">Subtotal: <span id="final-subtotal">R$ 0,00</span></p>
                 <p class="text-lg font-bold text-red-800">Taxa: <span id="final-fee">R$ 2,00</span></p>
@@ -179,15 +185,31 @@ body {
             </button>
         </section>
     </div>
-
 </div>
 
+<div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" onclick="hideModal()">
+    <div id="modal-content" class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+        <div id="modal-header" class="flex justify-between items-center pb-3 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-800">Aviso</h3>
+            <button onclick="hideModal()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="py-4">
+            <p id="modal-text" class="text-gray-700"></p>
+        </div>
+        <div class="pt-3 border-t border-gray-200 text-right">
+            <button onclick="hideModal()" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-150">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
 <script>
     // --- DADOS DO CARDÁPIO (FONTE ÚNICA DE VERDADE) ---
     const MENU = {
         massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
-        // Acompanhamentos - O item "Queijo" foi removido daqui
         acompanhamentos: [
             "Alho", "Alho Frito", "Azeitona", "Bacon", "Brócolis",
             "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
@@ -195,7 +217,6 @@ body {
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
         ],
-        // Novo: Opções de Queijo
         queijos: ["Parmesão Ralado", "Muçarela Ralada"],
         acompanhamentosPremium: {
             'Camarão': 10.00
@@ -209,7 +230,11 @@ body {
             precoUnitario: 6.00, 
             volume: "350ml"
         },
-        whatsappNumber: "5517997381858" 
+        whatsappNumber: "5517997381858",
+        // CHAVE PIX (ATUALIZADO)
+        pixKey: "41756000867",
+        // NOME DO TITULAR (NOVO)
+        pixName: "SUÉLEM CRISTINA MAESTRE MAZZUCCA"
     };
 
     // --- ESTADO GLOBAL ---
@@ -225,7 +250,6 @@ body {
     const massaOptionsDiv = document.getElementById('massa-options');
     const molhoOptionsDiv = document.getElementById('molho-options');
     const acompOptionsDiv = document.getElementById('acomp-options');
-    // Novo: Opções de Queijo
     const queijoOptionsDiv = document.getElementById('queijo-options'); 
     const acompCounter = document.getElementById('acomp-counter');
     const itemPriceDisplay = document.getElementById('item-price-display');
@@ -237,6 +261,53 @@ body {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
+    
+    // NOVO: Referências do PIX (ATUALIZADAS)
+    const paymentMethodSelect = document.getElementById('payment-method');
+    const pixInfoDiv = document.getElementById('pix-info');
+    const pixNumberDisplay = document.getElementById('pix-number');
+    const pixNameDisplay = document.getElementById('pix-name'); // NOVO: Referência ao nome
+
+    // --- FUNÇÕES DE MODAL ---
+    function showModal(message, colorClass = 'bg-gray-500') {
+        const modal = document.getElementById('custom-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalHeader = document.getElementById('modal-header');
+        const modalText = document.getElementById('modal-text');
+
+        modalHeader.className = modalHeader.className.replace(/bg-\w+-\d+/g, '').trim();
+
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+        
+        const headerTitle = modalHeader.querySelector('h3');
+        headerTitle.classList.remove('text-green-800', 'text-red-800', 'text-yellow-800', 'text-gray-800');
+
+        if (colorClass.includes('green')) {
+            headerTitle.textContent = 'Sucesso! 🎉';
+            headerTitle.classList.add('text-green-800');
+        } else if (colorClass.includes('red')) {
+            headerTitle.textContent = 'Erro';
+            headerTitle.classList.add('text-red-800');
+        } else if (colorClass.includes('yellow')) {
+            headerTitle.textContent = 'Atenção';
+            headerTitle.classList.add('text-yellow-800');
+        } else {
+            headerTitle.textContent = 'Aviso';
+            headerTitle.classList.add('text-gray-800');
+        }
+
+        modalText.innerHTML = message.replace(/\n/g, '<br>');
+
+        modal.classList.remove('hidden');
+    }
+
+    function hideModal() {
+        const modal = document.getElementById('custom-modal');
+        modal.classList.add('hidden');
+        document.getElementById('modal-content').classList.remove('scale-100');
+        document.getElementById('modal-content').classList.add('scale-95');
+    }
 
     // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL ---
 
@@ -247,7 +318,6 @@ body {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
-            // Força a primeira opção de Queijo a ser checked por ser obrigatória
             const isQueijoOption = name === 'queijo';
             const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
@@ -275,12 +345,10 @@ body {
         `).join('');
     }
 
-    // NOVO: Função para renderizar o queijo
     function renderQueijo() {
         renderOptions(queijoOptionsDiv, 'queijo', MENU.queijos, 'radio', MENU.queijos[0]);
     }
     
-    // ATUALIZADO: Função para renderizar bebidas com input de quantidade
     function renderBebidas() {
         bebidasOptionsDiv.innerHTML = MENU.bebidas.opcoes.map(bebida => {
             const id = `qtd-${bebida.toLowerCase().replace(/\s/g, '-')}`;
@@ -290,37 +358,48 @@ body {
                         ${bebida} ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')})
                     </label>
                     <input type="number" id="${id}" name="bebida-qty" data-name="${bebida}"
-                           min="0" value="0" class="drink-input" 
-                           onchange="updateBebidasTotal(); renderCart();">
+                            min="0" value="0" class="drink-input" 
+                            onchange="updateBebidasTotal(); renderCart();">
                 </div>
             `;
         }).join('');
     }
 
+    // NOVO: Função para manipular a mudança do PIX (ATUALIZADA)
+    function handlePaymentChange() {
+        if (paymentMethodSelect.value === 'Pix') {
+            pixNameDisplay.textContent = MENU.pixName; // Adiciona o nome
+            pixNumberDisplay.textContent = MENU.pixKey;
+            pixInfoDiv.classList.remove('hidden');
+        } else {
+            pixInfoDiv.classList.add('hidden');
+        }
+    }
+
     function setupUI() {
-        // Renderiza as seções do Prato
         renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
         renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio');
         renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio');
         renderAcompanhamentos();
-        renderQueijo(); // Novo!
-
-        // Renderiza as bebidas com campo de quantidade
+        renderQueijo();
         renderBebidas();
 
-        // Adiciona Listeners
         sizeOptionsDiv.addEventListener('change', updateLimitAndPrice);
         acompOptionsDiv.addEventListener('change', updateAcompCount);
         document.querySelector('input[name="acompPremium"]').addEventListener('change', updateItemPrice);
         deliveryFeeRadios.forEach(radio => radio.addEventListener('change', updateFinalSummary));
+        
+        // NOVO: Adiciona listener para a mudança do método de pagamento
+        paymentMethodSelect.addEventListener('change', handlePaymentChange);
 
-        // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
-        renderCart(); 
+        renderCart();
+        
+        // NOVO: Inicializa o display do PIX 
+        handlePaymentChange();
     }
 
-    // Lógicas de atualização 
     function updateLimitAndPrice() {
         const selectedSizeId = document.querySelector('input[name="size"]:checked').value;
         const selectedSize = MENU.tamanhos.find(t => t.id === selectedSizeId);
@@ -398,7 +477,7 @@ body {
         const sizeRadio = document.querySelector('input[name="size"]:checked');
         const massaRadio = document.querySelector('input[name="massa"]:checked');
         const molhoRadio = document.querySelector('input[name="molho"]:checked');
-        const queijoRadio = document.querySelector('input[name="queijo"]:checked'); // Novo
+        const queijoRadio = document.querySelector('input[name="queijo"]:checked'); 
         const acompCheckboxes = document.querySelectorAll('input[name="acomp"]:checked');
         const camarãoCheckbox = document.querySelector('input[name="acompPremium"][value="Camarão"]');
         
@@ -417,7 +496,7 @@ body {
             price: currentItemPrice,
             massa: massaRadio.value,
             molho: molhoRadio.value,
-            queijo: queijoRadio.value, // Novo
+            queijo: queijoRadio.value, 
             acompanhamentos: Array.from(acompCheckboxes).map(cb => cb.value),
             premium: camarão,
             obs: document.getElementById('obs').value.trim()
@@ -445,11 +524,9 @@ body {
     }
     
     function resetForm() {
-        // Reset do Prato
         document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
-             // Força a seleção da primeira opção de queijo ao resetar, pois é obrigatório
              r.checked = index === 0; 
         });
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
@@ -460,8 +537,6 @@ body {
         updateLimitAndPrice(); 
     }
 
-    // --- FUNÇÕES DE CARRINHO E TOTALIZAÇÃO ---
-
     function renderCart() {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
@@ -470,7 +545,6 @@ body {
         if (cart.length === 0 && bebidas.length === 0) {
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
         } else {
-            // 1. Renderiza os Pratos
             cart.forEach((item, index) => {
                 subtotalPratos += item.price;
                 const li = document.createElement('li');
@@ -494,7 +568,6 @@ body {
                 cartList.appendChild(li);
             });
             
-            // 2. Adiciona as Bebidas (no final da lista de itens)
             if (bebidas.length > 0) {
                 const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
                 totalUnidadesBebidas = bebidas.reduce((sum, item) => sum + item.qtd, 0);
@@ -609,16 +682,16 @@ body {
         }
         cart.forEach((item, index) => {
             const acompText = item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum';
-            const camarãoText = item.premium ? `\n  Premium: ${item.premium.name} (+ R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
+            const camarãoText = item.premium ? `\n  Premium: ${item.premium.name} (+ R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
 
             message += `\n*PRATO #${index + 1} (${item.size}):*\n`;
-            message += `  Massa: ${item.massa}\n`;
-            message += `  Molho: ${item.molho}\n`;
-            message += `  Queijo: *${item.queijo}* (Incluso)\n`; // Novo: Queijo
-            message += `  Acompanhamentos Comuns: ${acompText}`;
+            message += `  Massa: ${item.massa}\n`;
+            message += `  Molho: ${item.molho}\n`;
+            message += `  Queijo: *${item.queijo}* (Incluso)\n`; 
+            message += `  Acompanhamentos Comuns: ${acompText}`;
             message += `${camarãoText}\n`;
-            message += `  Obs: ${item.obs || 'Nenhuma'}\n`;
-            message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+            message += `  Obs: ${item.obs || 'Nenhuma'}\n`;
+            message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
         });
         
         // Adiciona Bebidas com Quantidade
@@ -626,9 +699,9 @@ body {
         if (bebidas.length > 0) {
             message += `*Latas ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')}/cada):*\n`;
             bebidas.forEach(b => {
-                message += `  - ${b.qtd}x ${b.nome}\n`;
+                message += `  - ${b.qtd}x ${b.nome}\n`;
             });
-            message += `  _Total Bebidas: R$ ${subtotalBebidas.toFixed(2).replace('.', ',')}_\n`;
+            message += `  _Total Bebidas: R$ ${subtotalBebidas.toFixed(2).replace('.', ',')}_\n`;
         } else {
             message += `_Nenhuma bebida adicionada._\n`;
         }
@@ -644,65 +717,35 @@ body {
         message += `Telefone: ${telefone}\n`;
         message += `Endereço: ${endereco}\n`;
         message += `Referência: ${referencia || 'Sem referência'}\n`;
-        message += `Pagamento: ${paymentMethod}\n\n`;
+        message += `Pagamento: ${paymentMethod}\n`;
         
-        message += `Aguardamos a confirmação! Obrigado!`;
+        // Adiciona PIX à mensagem se for o método selecionado (ATUALIZADO)
+        if (paymentMethod === 'Pix') {
+             message += `*Titular PIX:* ${MENU.pixName}\n`; // Adiciona nome
+             message += `*CHAVE PIX (CPF):* ${MENU.pixKey}\n`;
+        }
+        
+        message += `\nAguardamos a confirmação! Obrigado!`;
         
         const encodedMessage = encodeURIComponent(message);
         const whatsappLink = `https://wa.me/${MENU.whatsappNumber}?text=${encodedMessage}`;
 
         try {
-            const newWindow = window.open(whatsappLink, '_blank');
-            if (newWindow === null || typeof newWindow === 'undefined' || newWindow.closed) {
-                showModal(`
-                    <h3 class="text-xl font-bold text-yellow-700 mb-2">Atenção: Pop-up Bloqueado!</h3>
-                    <p>Seu navegador impediu a abertura automática do WhatsApp. Clique no link abaixo:</p>
-                    <a href="${whatsappLink}" target="_blank" class="text-blue-600 underline font-bold mt-3 block p-2 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100">
-                        CLIQUE AQUI PARA ABRIR O WHATSAPP
-                    </a>
-                `, 'bg-yellow-600');
-            }
+            window.open(whatsappLink, '_blank');
+            showModal('Seu pedido foi enviado com sucesso para o WhatsApp! Clique para confirmar e envie a mensagem.', 'bg-green-500');
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
         } catch (error) {
-            console.error("Erro ao tentar abrir o WhatsApp:", error);
-            showModal('Ocorreu um erro inesperado ao tentar abrir o WhatsApp.', 'bg-red-500');
-        } finally {
+            console.error('Erro ao tentar abrir o WhatsApp:', error);
+            showModal('Houve um erro ao tentar abrir o WhatsApp. Verifique sua conexão e tente novamente.', 'bg-red-500');
             checkoutBtn.disabled = false;
             checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
         }
     }
 
-    // --- FUNÇÃO MODAL ---
-
-    function showModal(message, bgColor) {
-        const modalId = 'temp-modal';
-        let modal = document.getElementById(modalId);
-        
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = modalId;
-            modal.className = 'fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0';
-            modal.innerHTML = `
-                <div class="bg-white p-6 rounded-lg shadow-2xl max-w-sm w-full transform scale-95 transition-transform duration-300">
-                    <div id="modal-content" class="text-center"></div>
-                    <button onclick="document.getElementById('${modalId}').remove()" class="mt-4 w-full ${bgColor} text-white font-bold py-2 rounded-lg hover:opacity-90">
-                        Entendi
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        
-        document.getElementById('modal-content').innerHTML = message;
-        
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            modal.querySelector('div').classList.remove('scale-95');
-            modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-    }
-
-    // --- INICIALIZAÇÃO ---
-    window.onload = setupUI;
-    
+    // Inicializa a aplicação
+    document.addEventListener('DOMContentLoaded', setupUI);
 </script>
+
 </body>
+</html>
