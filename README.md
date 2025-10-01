@@ -53,7 +53,7 @@ fieldset:disabled {
 
 <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl space-y-6 md:p-0">
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
-        <img src="https://i.postimg.cc/SxG0ZdkP/Imagem-do-Whats-App-de-2025-09-27-s-08-18-25-4912c35a.jpg" 
+        <img src="[https://i.postimg.cc/SxG0ZdkP/Imagem-do-Whats-App-de-2025-09-27-s-08-18-25-4912c35a.jpg](https://i.postimg.cc/prk8G3cV/Imagem-do-Whats-App-de-2025-10-01-s-01-45-52-b1184834.jpg)" 
              alt="Logo Massa Nostra" 
              class="w-40 h-40 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
