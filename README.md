@@ -164,12 +164,6 @@ body {
                 </select>
             </div>
             
-            <div id="pix-info" class="p-3 bg-green-100 border border-green-300 rounded-lg shadow-md hidden">
-                <p class="font-bold text-green-800">PIX Selecionado!</p>
-                <p class="text-sm text-gray-700">Titular: <span id="pix-name" class="font-extrabold text-green-900"></span></p>
-                <p class="text-sm text-gray-700">Chave PIX (CPF): <span id="pix-number" class="font-extrabold text-green-900"></span></p>
-                <p class="text-xs text-gray-500 mt-1">Lembre-se: O pagamento via PIX deve ser confirmado no WhatsApp.</p>
-            </div>
             <div class="mt-6 p-4 bg-red-100 rounded-lg shadow-inner">
                 <p class="text-lg font-bold text-red-800">Subtotal: <span id="final-subtotal">R$ 0,00</span></p>
                 <p class="text-lg font-bold text-red-800">Taxa: <span id="final-fee">R$ 2,00</span></p>
@@ -185,26 +179,9 @@ body {
             </button>
         </section>
     </div>
+
 </div>
 
-<div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" onclick="hideModal()">
-    <div id="modal-content" class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full transform transition-all duration-300 scale-95" onclick="event.stopPropagation()">
-        <div id="modal-header" class="flex justify-between items-center pb-3 border-b border-gray-200">
-            <h3 class="text-xl font-bold text-gray-800">Aviso</h3>
-            <button onclick="hideModal()" class="text-gray-400 hover:text-gray-600 transition duration-150">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <div class="py-4">
-            <p id="modal-text" class="text-gray-700"></p>
-        </div>
-        <div class="pt-3 border-t border-gray-200 text-right">
-            <button onclick="hideModal()" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-150">
-                Fechar
-            </button>
-        </div>
-    </div>
-</div>
 <script>
     // --- DADOS DO CARDÁPIO (FONTE ÚNICA DE VERDADE) ---
     const MENU = {
@@ -217,6 +194,7 @@ body {
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
         ],
+        // Opções de Queijo
         queijos: ["Parmesão Ralado", "Muçarela Ralada"],
         acompanhamentosPremium: {
             'Camarão': 10.00
@@ -231,10 +209,11 @@ body {
             volume: "350ml"
         },
         whatsappNumber: "5517997381858",
-        // CHAVE PIX (ATUALIZADO)
-        pixKey: "41756000867",
-        // NOME DO TITULAR (NOVO)
-        pixName: "SUÉLEM CRISTINA MAESTRE MAZZUCCA"
+        // NOVO: DADOS DO PIX
+        pixData: { 
+            name: "SUÉLEM CRISTINA MAESTRE MAZZUCCA",
+            key: "4175600867 (CPF)" 
+        }
     };
 
     // --- ESTADO GLOBAL ---
@@ -261,53 +240,6 @@ body {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
-    
-    // NOVO: Referências do PIX (ATUALIZADAS)
-    const paymentMethodSelect = document.getElementById('payment-method');
-    const pixInfoDiv = document.getElementById('pix-info');
-    const pixNumberDisplay = document.getElementById('pix-number');
-    const pixNameDisplay = document.getElementById('pix-name'); // NOVO: Referência ao nome
-
-    // --- FUNÇÕES DE MODAL ---
-    function showModal(message, colorClass = 'bg-gray-500') {
-        const modal = document.getElementById('custom-modal');
-        const modalContent = document.getElementById('modal-content');
-        const modalHeader = document.getElementById('modal-header');
-        const modalText = document.getElementById('modal-text');
-
-        modalHeader.className = modalHeader.className.replace(/bg-\w+-\d+/g, '').trim();
-
-        modalContent.classList.remove('scale-95');
-        modalContent.classList.add('scale-100');
-        
-        const headerTitle = modalHeader.querySelector('h3');
-        headerTitle.classList.remove('text-green-800', 'text-red-800', 'text-yellow-800', 'text-gray-800');
-
-        if (colorClass.includes('green')) {
-            headerTitle.textContent = 'Sucesso! 🎉';
-            headerTitle.classList.add('text-green-800');
-        } else if (colorClass.includes('red')) {
-            headerTitle.textContent = 'Erro';
-            headerTitle.classList.add('text-red-800');
-        } else if (colorClass.includes('yellow')) {
-            headerTitle.textContent = 'Atenção';
-            headerTitle.classList.add('text-yellow-800');
-        } else {
-            headerTitle.textContent = 'Aviso';
-            headerTitle.classList.add('text-gray-800');
-        }
-
-        modalText.innerHTML = message.replace(/\n/g, '<br>');
-
-        modal.classList.remove('hidden');
-    }
-
-    function hideModal() {
-        const modal = document.getElementById('custom-modal');
-        modal.classList.add('hidden');
-        document.getElementById('modal-content').classList.remove('scale-100');
-        document.getElementById('modal-content').classList.add('scale-95');
-    }
 
     // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL ---
 
@@ -318,6 +250,7 @@ body {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
+            // Força a primeira opção de Queijo a ser checked por ser obrigatória
             const isQueijoOption = name === 'queijo';
             const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
@@ -365,41 +298,30 @@ body {
         }).join('');
     }
 
-    // NOVO: Função para manipular a mudança do PIX (ATUALIZADA)
-    function handlePaymentChange() {
-        if (paymentMethodSelect.value === 'Pix') {
-            pixNameDisplay.textContent = MENU.pixName; // Adiciona o nome
-            pixNumberDisplay.textContent = MENU.pixKey;
-            pixInfoDiv.classList.remove('hidden');
-        } else {
-            pixInfoDiv.classList.add('hidden');
-        }
-    }
-
     function setupUI() {
+        // Renderiza as seções do Prato
         renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
         renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio');
         renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio');
         renderAcompanhamentos();
-        renderQueijo();
+        renderQueijo(); 
+
+        // Renderiza as bebidas com campo de quantidade
         renderBebidas();
 
+        // Adiciona Listeners
         sizeOptionsDiv.addEventListener('change', updateLimitAndPrice);
         acompOptionsDiv.addEventListener('change', updateAcompCount);
         document.querySelector('input[name="acompPremium"]').addEventListener('change', updateItemPrice);
         deliveryFeeRadios.forEach(radio => radio.addEventListener('change', updateFinalSummary));
-        
-        // NOVO: Adiciona listener para a mudança do método de pagamento
-        paymentMethodSelect.addEventListener('change', handlePaymentChange);
 
+        // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
-        renderCart();
-        
-        // NOVO: Inicializa o display do PIX 
-        handlePaymentChange();
+        renderCart(); 
     }
 
+    // Lógicas de atualização 
     function updateLimitAndPrice() {
         const selectedSizeId = document.querySelector('input[name="size"]:checked').value;
         const selectedSize = MENU.tamanhos.find(t => t.id === selectedSizeId);
@@ -520,13 +442,15 @@ body {
         setTimeout(() => {
             addToCartBtn.disabled = false;
             addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
-        }, 300); 
+        } , 300); 
     }
     
     function resetForm() {
+        // Reset do Prato
         document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
+             // Força a seleção da primeira opção de queijo ao resetar, pois é obrigatório
              r.checked = index === 0; 
         });
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
@@ -537,6 +461,8 @@ body {
         updateLimitAndPrice(); 
     }
 
+    // --- FUNÇÕES DE CARRINHO E TOTALIZAÇÃO ---
+
     function renderCart() {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
@@ -545,6 +471,7 @@ body {
         if (cart.length === 0 && bebidas.length === 0) {
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
         } else {
+            // 1. Renderiza os Pratos
             cart.forEach((item, index) => {
                 subtotalPratos += item.price;
                 const li = document.createElement('li');
@@ -568,6 +495,7 @@ body {
                 cartList.appendChild(li);
             });
             
+            // 2. Adiciona as Bebidas (no final da lista de itens)
             if (bebidas.length > 0) {
                 const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
                 totalUnidadesBebidas = bebidas.reduce((sum, item) => sum + item.qtd, 0);
@@ -673,7 +601,7 @@ body {
         const feeLabel = feeRadio.nextElementSibling.textContent.trim();
 
         // Montagem da Mensagem do Pedido
-        let message = `🍝 Olá, Massa Nostra! Meu pedido é o seguinte:\n\n`;
+        let message = `🍝 Olá, Massa Nostra! Meu pedido de *${nome}* é o seguinte:\n\n`;
         
         // Adiciona Pratos
         message += `--- ITENS (${cart.length} prato(s)) ---\n`;
@@ -681,17 +609,26 @@ body {
             message += `_Nenhum prato montado._\n`;
         }
         cart.forEach((item, index) => {
-            const acompText = item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum';
-            const camarãoText = item.premium ? `\n  Premium: ${item.premium.name} (+ R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
+            // Acompanhamentos Comuns em MAIÚSCULO e NEGITO
+            const acompText = item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ').toUpperCase() : 'Nenhum';
+            
+            // Acompanhamento Premium em MAIÚSCULO e NEGITO
+            const camarãoText = item.premium ? 
+                `\n  Premium: *${item.premium.name.toUpperCase()}* (+ R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` 
+                : '';
 
             message += `\n*PRATO #${index + 1} (${item.size}):*\n`;
-            message += `  Massa: ${item.massa}\n`;
-            message += `  Molho: ${item.molho}\n`;
-            message += `  Queijo: *${item.queijo}* (Incluso)\n`; 
-            message += `  Acompanhamentos Comuns: ${acompText}`;
+            // Massa em MAIÚSCULO e NEGITO
+            message += `  Massa: *${item.massa.toUpperCase()}*\n`;
+            // Molho em MAIÚSCULO e NEGITO
+            message += `  Molho: *${item.molho.toUpperCase()}*\n`;
+            message += `  Queijo: *${item.queijo}* (Incluso)\n`; 
+            // Acompanhamentos Comuns: em MAIÚSCULO e em NEGITO
+            message += `  Acompanhamentos Comuns: *${acompText}*`;
             message += `${camarãoText}\n`;
-            message += `  Obs: ${item.obs || 'Nenhuma'}\n`;
-            message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+            // Observação em NEGITO
+            message += `  Obs: *${item.obs || 'Nenhuma'}*\n`;
+            message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
         });
         
         // Adiciona Bebidas com Quantidade
@@ -699,9 +636,9 @@ body {
         if (bebidas.length > 0) {
             message += `*Latas ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')}/cada):*\n`;
             bebidas.forEach(b => {
-                message += `  - ${b.qtd}x ${b.nome}\n`;
+                message += `  - ${b.qtd}x ${b.nome}\n`;
             });
-            message += `  _Total Bebidas: R$ ${subtotalBebidas.toFixed(2).replace('.', ',')}_\n`;
+            message += `  _Total Bebidas: R$ ${subtotalBebidas.toFixed(2).replace('.', ',')}_\n`;
         } else {
             message += `_Nenhuma bebida adicionada._\n`;
         }
@@ -717,33 +654,57 @@ body {
         message += `Telefone: ${telefone}\n`;
         message += `Endereço: ${endereco}\n`;
         message += `Referência: ${referencia || 'Sem referência'}\n`;
-        message += `Pagamento: ${paymentMethod}\n`;
         
-        // Adiciona PIX à mensagem se for o método selecionado (ATUALIZADO)
+        // Adiciona Dados de Pagamento e Pix
+        message += `Pagamento: ${paymentMethod}\n\n`;
+
+        // NOVO: Adiciona as informações do PIX se o método for selecionado
         if (paymentMethod === 'Pix') {
-             message += `*Titular PIX:* ${MENU.pixName}\n`; // Adiciona nome
-             message += `*CHAVE PIX (CPF):* ${MENU.pixKey}\n`;
+            message += `🚨 *PAGAMENTO VIA PIX SELECIONADO:*\n`;
+            message += `  *Nome:* ${MENU.pixData.name}\n`;
+            message += `  *Chave:* ${MENU.pixData.key}\n\n`;
         }
-        
-        message += `\nAguardamos a confirmação! Obrigado!`;
+
+        message += `Aguardamos a confirmação! Obrigado!`;
         
         const encodedMessage = encodeURIComponent(message);
         const whatsappLink = `https://wa.me/${MENU.whatsappNumber}?text=${encodedMessage}`;
 
         try {
-            window.open(whatsappLink, '_blank');
-            showModal('Seu pedido foi enviado com sucesso para o WhatsApp! Clique para confirmar e envie a mensagem.', 'bg-green-500');
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
+            const newWindow = window.open(whatsappLink, '_blank');
+            if (!newWindow || newWindow.closed || typeof newWindow.closed=='undefined') {
+                // Caso o navegador bloqueie a abertura
+                showModal('O bloqueador de pop-ups impediu a abertura do WhatsApp. Por favor, desabilite-o.', 'bg-yellow-500');
+            }
         } catch (error) {
-            console.error('Erro ao tentar abrir o WhatsApp:', error);
-            showModal('Houve um erro ao tentar abrir o WhatsApp. Verifique sua conexão e tente novamente.', 'bg-red-500');
+            console.error("Erro ao tentar abrir o WhatsApp:", error);
+        } finally {
+            // Re-habilita o botão após a tentativa
             checkoutBtn.disabled = false;
             checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
         }
     }
 
-    // Inicializa a aplicação
+    // Função de Modal Simples (Para fins de teste e feedback ao usuário)
+    function showModal(message, bgColor) {
+        if (!document.getElementById('simple-modal')) {
+            const modal = document.createElement('div');
+            modal.id = 'simple-modal';
+            modal.className = 'fixed top-0 left-0 right-0 p-4 text-center text-white font-bold transition-all duration-300 transform translate-y-[-100%] z-50';
+            document.body.appendChild(modal);
+        }
+        
+        const modal = document.getElementById('simple-modal');
+        modal.className = `fixed top-0 left-0 right-0 p-4 text-center text-white font-bold transition-all duration-300 ${bgColor} z-50`;
+        modal.textContent = message;
+        modal.style.transform = 'translateY(0)';
+        
+        setTimeout(() => {
+            modal.style.transform = 'translateY(-100%)';
+        }, 3000);
+    }
+    
+    // Inicia a aplicação
     document.addEventListener('DOMContentLoaded', setupUI);
 </script>
 
