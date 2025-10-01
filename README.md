@@ -53,7 +53,7 @@ fieldset:disabled {
 
 <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl space-y-6 md:p-0">
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
-        <img src="https://drive.google.com/file/d/1dFalNjMDpLP1iO6GFCD-ZMw5yyojM5Gr/view?usp=sharing" 
+        <img src="https://scontent-gru1-2.cdninstagram.com/v/t51.2885-19/553383428_17844941781578811_4104766548048971127_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby45MjAuYzIifQ&_nc_ht=scontent-gru1-2.cdninstagram.com&_nc_cat=103&_nc_oc=Q6cZ2QGhvHvGUVcRcHNJLrpZGJ5XTsnj41Di74gRTr5-47BZDt_G0NTmLDnYHBVKFw25qtjt1Q786PjMXrHn2csM84Jd&_nc_ohc=imjLjQ49q3YQ7kNvwG_te-K&_nc_gid=tjEcI_d3C5FFCGvgk3f2aQ&edm=AP4sbd4BAAAA&ccb=7-5&oh=00_AfYsipRHx2Hvlnc9iv05-lsh1f5XuZP3v4VA2_iOAhvw8w&oe=68E26986&_nc_sid=7a9f4b" 
              alt="Logo Massa Nostra" 
              class="w-60 h-60 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
