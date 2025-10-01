@@ -53,7 +53,7 @@ fieldset:disabled {
 
 <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl space-y-6 md:p-0">
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
-        <img src="https://github.com/psgmazzucca-alt/Imagens/blob/main/TESTE%202.jpg" 
+        <img src="https://imgur.com/a/qWjQXO3" 
              alt="Logo Massa Nostra" 
              class="w-60 h-60 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
