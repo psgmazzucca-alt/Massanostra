@@ -58,14 +58,14 @@ fieldset:disabled {
              class="w-40 h-40 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
             <h1 class="text-4xl font-extrabold text-white sm:text-5xl flag-text-shadow leading-tight">MASSA NOSTRA POTY</h1>
-            <p class="text-base text-white font-medium mt-1 flag-text-shadow">@massanostra_poty | Monte seu prato e faça seu pedido!</p>
+            <p class="text-base text-white font-medium mt-1 flag-text-shadow">@massanostra_poty | Monte sua massa!</p>
         </div>
     </header>
 
     <div class="p-6 space-y-6 md:p-8 pt-0">
         
         <section id="custom-order-section" class="space-y-6 p-4 border border-red-100 rounded-xl bg-red-50">
-            <h2 class="section-title text-red-800">🍝 Monte Seu Prato</h2>
+            <h2 class="section-title text-red-800">🍝 Monte Sua Massa</h2>
 
             <div class="space-y-2">
                 <label class="block font-semibold text-gray-700">📏 1. Escolha o Tamanho</label>
