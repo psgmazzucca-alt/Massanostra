@@ -17,12 +17,19 @@ body {
     @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition duration-150;
 }
 /* Estilo para item desabilitado visualmente */
-.acomp-option input:disabled + span {
+.acomp-option input:disabled + span,
+.input-style:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     background-color: #f3f4f6;
     text-decoration: line-through;
 }
+/* Estilo para fieldset desabilitado (opcional, para reforçar) */
+fieldset:disabled {
+    pointer-events: none; /* Impede cliques */
+    opacity: 0.7; /* Suaviza a cor */
+}
+
 /* Adicionando sombra ao texto para que fique legível sobre a bandeira */
 .flag-text-shadow {
     text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
@@ -58,28 +65,28 @@ body {
     <div class="p-6 space-y-6 md:p-8 pt-0">
         
         <section id="custom-order-section" class="space-y-6 p-4 border border-red-100 rounded-xl bg-red-50">
-            <h2 class="section-title text-red-800">Monte Seu Prato</h2>
+            <h2 class="section-title text-red-800">🍝 Monte Seu Prato</h2>
 
             <div class="space-y-2">
-                <label class="block font-semibold text-gray-700">1. Escolha o Tamanho</label>
+                <label class="block font-semibold text-gray-700">📏 1. Escolha o Tamanho</label>
                 <div id="size-options" class="flex space-x-4">
                     </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label class="block font-semibold text-gray-700">2. Escolha a Massa (Obrigatório)</label>
+                    <label class="block font-semibold text-gray-700">🍝 2. Escolha a Massa (Obrigatório)</label>
                     <div id="massa-options" class="space-y-1"></div>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block font-semibold text-gray-700">3. Escolha o Molho (Obrigatório)</label>
+                    <label class="block font-semibold text-gray-700">🥣 3. Escolha o Molho (Obrigatório)</label>
                     <div id="molho-options" class="space-y-1"></div>
                 </div>
             </div>
 
             <div class="space-y-2">
-                <label class="block font-semibold text-gray-700">4. Acompanhamentos Comuns</label>
+                <label class="block font-semibold text-gray-700">🥓 4. Acompanhamentos Comuns</label>
                 
                 <div id="acomp-premium-options" class="mb-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     </div>
@@ -90,7 +97,7 @@ body {
             </div>
 
             <div class="space-y-2">
-                <label class="block font-bold text-gray-800 border-t pt-4">5. Escolha o Queijo (Obrigatório)</label>
+                <label class="block font-bold text-gray-800 border-t pt-4">🧀 5. Escolha o Queijo (Obrigatório)</label>
                 <div id="queijo-options" class="flex space-x-4 cheese-option">
                     </div>
             </div>
@@ -110,17 +117,29 @@ body {
             </button>
         </section>
 
-        <section id="drinks-section" class="space-y-4 p-4 border border-blue-100 rounded-xl bg-blue-50">
-            <h2 class="section-title text-blue-800 border-blue-200">Adicionar Bebidas Geladas (R$ 6,00/cada)</h2>
-            <div id="bebidas-options" class="space-y-3">
+        <section id="dessert-section" class="space-y-4 p-4 border border-purple-100 rounded-xl bg-purple-50">
+            <h2 class="section-title text-purple-800 border-purple-200">🍰 Adicionar Sobremesa</h2>
+            <div id="sobremesa-options" class="space-y-3">
                 </div>
+            <p id="sobremesa-count" class="text-sm font-medium text-gray-600 pt-2 border-t border-purple-200">
+                Total de Unidades: <span id="sobremesa-unidades-display">0</span> | Total: <span id="sobremesa-total-display">R$ 0,00</span>
+            </p>
+        </section>
+
+
+        <section id="drinks-section" class="space-y-4 p-4 border border-blue-100 rounded-xl bg-blue-50">
+            <fieldset id="bebidas-fieldset" disabled> <h2 class="section-title text-blue-800 border-blue-200">🥤 Adicionar Bebidas Geladas (R$ 6,00/cada)</h2>
+                <div id="bebidas-options" class="space-y-3">
+                    </div>
+            </fieldset>
             <p id="bebidas-count" class="text-sm font-medium text-gray-600 pt-2 border-t border-blue-200">
                 Total de Unidades: <span id="bebidas-unidades-display">0</span> | Total: <span id="bebidas-total-display">R$ 0,00</span>
             </p>
         </section>
+        
 
         <section class="space-y-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
-            <h2 class="section-title text-gray-700 border-gray-200">Seu Pedido (<span id="cart-count">0</span> Pratos)</h2>
+            <h2 class="section-title text-gray-700 border-gray-200">🛒 Seu Pedido (<span id="cart-count">0</span> Pratos)</h2>
             <ul id="cart-list" class="space-y-3">
                 <li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>
             </ul>
@@ -156,14 +175,20 @@ body {
             
             <div class="space-y-2">
                 <label class="block font-semibold text-gray-700">Forma de Pagamento</label>
-                <select id="payment-method" class="input-style">
-                    <option value="Pix">Pix (Informar na mensagem)</option>
+                <select id="payment-method" class="input-style" onchange="toggleTrocoField()"> <option value="Pix">Pix (Informar na mensagem)</option>
                     <option value="Dinheiro">Dinheiro (Precisa de troco?)</option>
                     <option value="Cartao-Debito">Cartão de Débito</option>
                     <option value="Cartao-Credito">Cartão de Crédito</option>
                 </select>
             </div>
             
+            <div id="troco-input-container" class="space-y-2" style="display: none;">
+                <label for="troco" class="block font-semibold text-gray-700">Precisa de Troco?</label>
+                <input type="text" id="troco" class="input-style" placeholder="Troco para (Ex: R$ 50,00)">
+                <p class="text-sm text-gray-500">Deixe em branco se for pagar o valor exato.</p>
+            </div>
+
+
             <div class="mt-6 p-4 bg-red-100 rounded-lg shadow-inner">
                 <p class="text-lg font-bold text-red-800">Subtotal: <span id="final-subtotal">R$ 0,00</span></p>
                 <p class="text-lg font-bold text-red-800">Taxa: <span id="final-fee">R$ 2,00</span></p>
@@ -208,8 +233,13 @@ body {
             precoUnitario: 6.00, 
             volume: "350ml"
         },
+        // Sobremesa
+        sobremesa: {
+            nome: "Palha Italiana Ninho com Nutella",
+            precoUnitario: 12.00,
+        },
         whatsappNumber: "5517997381858",
-        // NOVO: DADOS DO PIX
+        // DADOS DO PIX
         pixData: { 
             name: "SUÉLEM CRISTINA MAESTRE MAZZUCCA",
             key: "4175600867 (CPF)" 
@@ -219,6 +249,7 @@ body {
     // --- ESTADO GLOBAL ---
     let cart = []; 
     let bebidas = []; 
+    let sobremesas = []; 
     let currentItemPrice = MENU.tamanhos[0].preco;
     let premiumPrice = 0; 
     let selectedAcompanhamentos = 0;
@@ -240,6 +271,16 @@ body {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
+    const sobremesaOptionsDiv = document.getElementById('sobremesa-options');
+    const sobremesaTotalDisplay = document.getElementById('sobremesa-total-display');
+    const sobremesaUnidadesDisplay = document.getElementById('sobremesa-unidades-display');
+    
+    // FIELDSET AGORA FOCADO APENAS EM BEBIDAS
+    const bebidasFieldset = document.getElementById('bebidas-fieldset'); 
+
+    // Referência para o campo de troco
+    const trocoInputContainer = document.getElementById('troco-input-container'); 
+    const paymentMethodSelect = document.getElementById('payment-method');
 
     // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL ---
 
@@ -250,7 +291,6 @@ body {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
-            // Força a primeira opção de Queijo a ser checked por ser obrigatória
             const isQueijoOption = name === 'queijo';
             const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
@@ -298,6 +338,23 @@ body {
         }).join('');
     }
 
+    // Renderizar Sobremesa
+    function renderSobremesas() {
+        const sobremesa = MENU.sobremesa;
+        const id = `qtd-${sobremesa.nome.toLowerCase().replace(/\s/g, '-')}`;
+
+        sobremesaOptionsDiv.innerHTML = `
+            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-md">
+                <label for="${id}" class="font-bold text-purple-700 flex-1">
+                    ${sobremesa.nome} (R$ ${sobremesa.precoUnitario.toFixed(2).replace('.', ',')})
+                </label>
+                <input type="number" id="${id}" name="sobremesa-qty" data-name="${sobremesa.nome}"
+                        min="0" value="0" class="drink-input" 
+                        onchange="updateSobremesasTotal(); renderCart();">
+            </div>
+        `;
+    }
+
     function setupUI() {
         // Renderiza as seções do Prato
         renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
@@ -306,6 +363,9 @@ body {
         renderAcompanhamentos();
         renderQueijo(); 
 
+        // Renderiza as sobremesas
+        renderSobremesas();
+        
         // Renderiza as bebidas com campo de quantidade
         renderBebidas();
 
@@ -318,8 +378,43 @@ body {
         // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
+        updateSobremesasTotal();
         renderCart(); 
+        
+        // Inicializa a regra de bloqueio (se não houver prato, bloqueia APENAS bebidas)
+        toggleDrinksAvailability(); 
     }
+    
+    // Função para alternar visibilidade do campo de troco
+    function toggleTrocoField() {
+        const isMoney = paymentMethodSelect.value === 'Dinheiro';
+        trocoInputContainer.style.display = isMoney ? 'block' : 'none';
+        // Limpa o campo se ele for escondido
+        if (!isMoney) {
+            document.getElementById('troco').value = '';
+        }
+    }
+
+    // Função para habilitar/desabilitar SOMENTE Bebidas
+    function toggleDrinksAvailability() {
+        // Apenas macarrão no carrinho conta para liberar os adicionais
+        const hasPasta = cart.length > 0; 
+        
+        bebidasFieldset.disabled = !hasPasta; 
+
+        // Se desabilitou e o usuário tinha algo selecionado, zera a quantidade
+        if (!hasPasta) {
+            // Zera Bebidas
+            document.querySelectorAll('input[name="bebida-qty"]').forEach(input => input.value = 0);
+            updateBebidasTotal();
+            
+            // Só mostra a mensagem se tinha bebida selecionada antes
+            if (bebidas.length > 0) {
+               showModal('Adicione um *Prato de Macarrão* primeiro para selecionar Bebidas.', 'bg-yellow-600');
+            }
+        }
+    }
+
 
     // Lógicas de atualização 
     function updateLimitAndPrice() {
@@ -394,6 +489,36 @@ body {
         
         updateFinalSummary(); 
     }
+    
+    // Função para atualizar o total de sobremesas
+    function updateSobremesasTotal() {
+        const input = document.querySelector('input[name="sobremesa-qty"]');
+        let qtd = parseInt(input.value) || 0;
+        
+        sobremesas = [];
+        let totalUnidades = 0;
+
+        if (qtd < 0) {
+            qtd = 0;
+            input.value = 0;
+        }
+        
+        if (qtd > 0) {
+            totalUnidades = qtd;
+            sobremesas.push({
+                nome: input.getAttribute('data-name'),
+                qtd: qtd
+            });
+        }
+        
+        const totalSobremesas = totalUnidades * MENU.sobremesa.precoUnitario;
+
+        sobremesaUnidadesDisplay.textContent = totalUnidades;
+        sobremesaTotalDisplay.textContent = `R$ ${totalSobremesas.toFixed(2).replace('.', ',')}`;
+        
+        updateFinalSummary();
+    }
+
 
     function getFormData() {
         const sizeRadio = document.querySelector('input[name="size"]:checked');
@@ -437,6 +562,12 @@ body {
             showModal('Prato adicionado ao carrinho! Você pode montar outro.', 'bg-green-500');
             renderCart();
             resetForm();
+            
+            // Chama a função para garantir que as bebidas estão liberadas
+            toggleDrinksAvailability(); 
+
+            // NOVO E CORRIGIDO: Scroll para a seção da Sobremesa
+            document.getElementById('dessert-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         setTimeout(() => {
@@ -467,8 +598,9 @@ body {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
         let totalUnidadesBebidas = 0;
+        let totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0);
 
-        if (cart.length === 0 && bebidas.length === 0) {
+        if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0) {
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
         } else {
             // 1. Renderiza os Pratos
@@ -495,7 +627,24 @@ body {
                 cartList.appendChild(li);
             });
             
-            // 2. Adiciona as Bebidas (no final da lista de itens)
+            // 2. Adiciona as Sobremesas
+            if (sobremesas.length > 0) {
+                const totalSobremesas = totalUnidadesSobremesas * MENU.sobremesa.precoUnitario;
+                subtotalPratos += totalSobremesas;
+                
+                const listaSobremesas = sobremesas.map(s => `${s.qtd}x ${s.nome}`).join(' | ');
+
+                const sobremesaItem = document.createElement('li');
+                sobremesaItem.className = 'p-3 border border-purple-200 bg-purple-50 rounded-lg shadow-sm mt-4';
+                sobremesaItem.innerHTML = `
+                    <h3 class="font-bold text-purple-800">🍰 Sobremesas (${totalUnidadesSobremesas} Unidade(s))</h3>
+                    <p class="text-sm text-gray-700">Palha Italiana: ${listaSobremesas}</p>
+                    <p class="text-lg font-extrabold text-purple-700 text-right">R$ ${totalSobremesas.toFixed(2).replace('.', ',')}</p>
+                `;
+                cartList.appendChild(sobremesaItem);
+            }
+            
+            // 3. Adiciona as Bebidas
             if (bebidas.length > 0) {
                 const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
                 totalUnidadesBebidas = bebidas.reduce((sum, item) => sum + item.qtd, 0);
@@ -504,9 +653,9 @@ body {
                 const listaBebidas = bebidas.map(b => `${b.qtd}x ${b.nome}`).join(' | ');
 
                 const bebidasItem = document.createElement('li');
-                bebidasItem.className = 'p-3 border border-blue-200 bg-blue-50 rounded-lg shadow-sm space-y-1 mt-4';
+                bebidasItem.className = 'p-3 border border-blue-200 bg-blue-50 rounded-lg shadow-sm mt-4';
                 bebidasItem.innerHTML = `
-                    <h3 class="font-bold text-blue-800">Bebidas (${totalUnidadesBebidas} Unidade(s))</h3>
+                    <h3 class="font-bold text-blue-800">🥤 Bebidas (${totalUnidadesBebidas} Unidade(s))</h3>
                     <p class="text-sm text-gray-700">Latas ${MENU.bebidas.volume}: ${listaBebidas}</p>
                     <p class="text-lg font-extrabold text-blue-700 text-right">R$ ${totalBebidas.toFixed(2).replace('.', ',')}</p>
                 `;
@@ -514,7 +663,7 @@ body {
             }
         }
 
-        checkoutSection.style.display = (cart.length > 0 || bebidas.length > 0) ? 'block' : 'none';
+        checkoutSection.style.display = (cart.length > 0 || bebidas.length > 0 || sobremesas.length > 0) ? 'block' : 'none';
 
         document.getElementById('cart-count').textContent = cart.length;
         document.getElementById('subtotal-display').textContent = `R$ ${subtotalPratos.toFixed(2).replace('.', ',')}`;
@@ -524,13 +673,17 @@ body {
     function removeItem(index) {
         cart.splice(index, 1);
         renderCart();
+        
+        // Chama a função para bloquear as bebidas se o carrinho de pratos esvaziar
+        toggleDrinksAvailability(); 
     }
 
     function updateFinalSummary() {
         const subtotalPratos = cart.reduce((sum, item) => sum + item.price, 0);
         const subtotalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
+        const subtotalSobremesas = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
         
-        const subtotalGeral = subtotalPratos + subtotalBebidas;
+        const subtotalGeral = subtotalPratos + subtotalBebidas + subtotalSobremesas;
 
         const feeRadio = document.querySelector('input[name="deliveryFee"]:checked');
         const deliveryFee = feeRadio ? parseFloat(feeRadio.value) : 2.00;
@@ -565,13 +718,20 @@ body {
 
         return isValid;
     }
+    
+    // Função para formatar o valor (retirar R$ e ,) e retornar float
+    function formatCurrencyToFloat(currencyString) {
+        if (!currencyString) return 0;
+        // Remove "R$", espaços, e troca vírgula por ponto
+        return parseFloat(currencyString.replace('R$', '').trim().replace(',', '.')) || 0;
+    }
 
     function generateWhatsAppLink() {
         checkoutBtn.disabled = true;
         checkoutBtn.textContent = 'Montando mensagem...';
 
-        if (cart.length === 0 && bebidas.length === 0) {
-            showModal('Seu carrinho e sua lista de bebidas estão vazios. Adicione um item antes de enviar.', 'bg-yellow-500');
+        if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0) {
+            showModal('Seu carrinho, bebidas e sobremesas estão vazios. Adicione um item antes de enviar.', 'bg-yellow-500');
             checkoutBtn.disabled = false;
             checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
             return;
@@ -588,29 +748,50 @@ body {
         const endereco = document.getElementById('endereco').value.trim();
         const referencia = document.getElementById('referencia').value.trim();
         const paymentMethod = document.getElementById('payment-method').value;
+        const trocoString = document.getElementById('troco').value.trim(); // Pega valor do troco
         
         const subtotalPratos = cart.reduce((sum, item) => sum + item.price, 0);
         const subtotalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
+        const subtotalSobremesas = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
+        
         const totalUnidadesBebidas = bebidas.reduce((sum, item) => sum + item.qtd, 0);
+        const totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0);
 
-        const subtotalGeral = subtotalPratos + subtotalBebidas;
+        const subtotalGeral = subtotalPratos + subtotalBebidas + subtotalSobremesas;
 
         const feeRadio = document.querySelector('input[name="deliveryFee"]:checked');
         const deliveryFee = feeRadio ? parseFloat(feeRadio.value) : 2.00;
         const finalTotalValue = subtotalGeral + deliveryFee;
         const feeLabel = feeRadio.nextElementSibling.textContent.trim();
 
+        // Lógica do Troco
+        let trocoText = "";
+        if (paymentMethod === 'Dinheiro') {
+            if (trocoString) {
+                const trocoValue = formatCurrencyToFloat(trocoString.replace('R$', ''));
+                if (trocoValue > finalTotalValue) {
+                    trocoText = `*Troco para:* R$ ${trocoValue.toFixed(2).replace('.', ',')}`;
+                } else {
+                    trocoText = `*Troco:* Vou pagar o valor exato (R$ ${finalTotalValue.toFixed(2).replace('.', ',')})`;
+                }
+            } else {
+                trocoText = `*Troco:* Vou pagar o valor exato (R$ ${finalTotalValue.toFixed(2).replace('.', ',')})`;
+            }
+        }
+
         // Montagem da Mensagem do Pedido
         let message = `🍝 Olá, Massa Nostra! Meu pedido de *${nome}* é o seguinte:\n\n`;
         
         // Adiciona Pratos
-        message += `--- ITENS (${cart.length} prato(s)) ---\n`;
+        message += `--- ITENS (🍝 ${cart.length} prato(s)) ---\n`;
         if (cart.length === 0) {
             message += `_Nenhum prato montado._\n`;
         }
         cart.forEach((item, index) => {
             // Acompanhamentos Comuns em MAIÚSCULO e NEGITO
-            const acompText = item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ').toUpperCase() : 'Nenhum';
+            const acompText = item.acompanhamentos.length > 0 
+                ? item.acompanhamentos.join(', ').toUpperCase() 
+                : 'Nenhum';
             
             // Acompanhamento Premium em MAIÚSCULO e NEGITO
             const camarãoText = item.premium ? 
@@ -631,8 +812,21 @@ body {
             message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
         });
         
+        // Adiciona Sobremesas
+        message += `\n--- SOBREMESAS (🍰 ${totalUnidadesSobremesas} unidade(s)) ---\n`;
+        if (sobremesas.length > 0) {
+            message += `*Valor: R$ ${MENU.sobremesa.precoUnitario.toFixed(2).replace('.', ',')}/cada:*\n`;
+            sobremesas.forEach(s => {
+                // SOBREMESA EM MAIÚSCULO E NEGITO
+                message += `  - ${s.qtd}x *${s.nome.toUpperCase()}*\n`; 
+            });
+            message += `  _Total Sobremesas: R$ ${subtotalSobremesas.toFixed(2).replace('.', ',')}_\n`;
+        } else {
+            message += `_Nenhuma sobremesa adicionada._\n`;
+        }
+
         // Adiciona Bebidas com Quantidade
-        message += `\n--- BEBIDAS (${totalUnidadesBebidas} lata(s)) ---\n`;
+        message += `\n--- BEBIDAS (🥤 ${totalUnidadesBebidas} lata(s)) ---\n`;
         if (bebidas.length > 0) {
             message += `*Latas ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')}/cada):*\n`;
             bebidas.forEach(b => {
@@ -655,12 +849,15 @@ body {
         message += `Endereço: ${endereco}\n`;
         message += `Referência: ${referencia || 'Sem referência'}\n`;
         
-        // Adiciona Dados de Pagamento e Pix
-        message += `Pagamento: ${paymentMethod}\n\n`;
+        // Adiciona Dados de Pagamento e Pix/Troco
+        message += `Forma de Pagamento: *${paymentMethod}*\n`;
+        if (paymentMethod === 'Dinheiro') {
+            message += `${trocoText}\n\n`;
+        }
 
-        // NOVO: Adiciona as informações do PIX se o método for selecionado
+        // Adiciona as informações do PIX se o método for selecionado
         if (paymentMethod === 'Pix') {
-            message += `🚨 *PAGAMENTO VIA PIX SELECIONADO:*\n`;
+            message += `\n🚨 *PAGAMENTO VIA PIX SELECIONADO:*\n`;
             message += `  *Nome:* ${MENU.pixData.name}\n`;
             message += `  *Chave:* ${MENU.pixData.key}\n\n`;
         }
