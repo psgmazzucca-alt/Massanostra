@@ -55,7 +55,7 @@ fieldset:disabled {
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
         <img src="https://drive.google.com/uc?id=1cGwwqA1h1z9G_s5l8DM9qkV9XkdYF--6" 
              alt="Logo Massa Nostra" 
-             class="w-40 h-40 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
+             class="w-60 h-60 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
             <h1 class="text-4xl font-extrabold text-white sm:text-5xl flag-text-shadow leading-tight">MASSA NOSTRA POTY</h1>
             <p class="text-base text-white font-medium mt-1 flag-text-shadow">@massanostra_poty | Monte seu prato e faça seu pedido!</p>
