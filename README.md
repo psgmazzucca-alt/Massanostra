@@ -242,7 +242,7 @@ fieldset:disabled {
         // DADOS DO PIX
         pixData: { 
             name: "SUÉLEM CRISTINA MAESTRE MAZZUCCA",
-            key: "4175600867 (CPF)" 
+            key: "41756000867 (CPF)" 
         }
     };
 
