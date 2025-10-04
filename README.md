@@ -210,7 +210,7 @@ fieldset:disabled {
 <script>
     // --- DADOS DO CARDÁPIO (FONTE ÚNICA DE VERDADE) ---
     const MENU = {
-        massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
+        massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini-ESGOTOU "],
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
             "Alho", "Alho Frito", "Azeitona", "Bacon", "Brócolis",
