@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -46,6 +47,10 @@ fieldset:disabled {
 /* Estilo para a nova seção de Queijo */
 .cheese-option {
     @apply p-3 bg-red-100 border border-red-300 rounded-lg shadow-inner;
+}
+/* Estilo para o botão de checkout desativado */
+#checkout-btn.closed-state {
+    @apply bg-gray-400 cursor-not-allowed transform-none shadow-none;
 }
 </style>
 </head>
@@ -238,8 +243,8 @@ fieldset:disabled {
             nome: "Palha Italiana Ninho com Nutella",
             precoUnitario: 12.00,
         },
-        whatsappNumber: "5517997381858",
-        // DADOS DO PIX
+        // 👇 TROQUE AQUI PELO SEU NÚMERO REAL 👇
+        whatsappNumber: "5517997381858", 
         pixData: { 
             name: "SUÉLEM CRISTINA MAESTRE MAZZUCCA",
             key: "41756000867 (CPF)" 
@@ -275,12 +280,64 @@ fieldset:disabled {
     const sobremesaTotalDisplay = document.getElementById('sobremesa-total-display');
     const sobremesaUnidadesDisplay = document.getElementById('sobremesa-unidades-display');
     
-    // FIELDSET AGORA FOCADO APENAS EM BEBIDAS
     const bebidasFieldset = document.getElementById('bebidas-fieldset'); 
 
-    // Referência para o campo de troco
     const trocoInputContainer = document.getElementById('troco-input-container'); 
     const paymentMethodSelect = document.getElementById('payment-method');
+
+    // --- NOVO: LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
+
+    /**
+     * Verifica se o estabelecimento está fechado.
+     * FECHADO: Domingo (0) depois das 14h, até Quarta (3) às 12h.
+     */
+    function isClosed() {
+        const now = new Date();
+        const day = now.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+        const hour = now.getHours();
+
+        // 1. Está fechado a qualquer hora na Segunda (1) ou Terça (2)
+        if (day >= 1 && day <= 2) {
+            return true;
+        }
+
+        // 2. Está fechado no Domingo (0) após as 14h
+        if (day === 0 && hour >= 14) {
+            return true;
+        }
+
+        // 3. Está fechado na Quarta (3) antes das 12h
+        if (day === 3 && hour < 12) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Aplica o estado de "fechado" ao botão do WhatsApp (checkout).
+     */
+    function applyClosedState() {
+        if (isClosed()) {
+            checkoutBtn.disabled = true;
+            // Remove classes de ativo e adiciona as de inativo
+            checkoutBtn.classList.remove('bg-green-500', 'hover:bg-green-600', 'transform', 'hover:scale-[1.01]', 'active:scale-[0.98]');
+            checkoutBtn.classList.add('closed-state');
+            checkoutBtn.textContent = '❌ FECHADO - Pedidos de Quarta (12h) a Domingo (14h)';
+            // Desativa o botão do carrinho se estiver no modo checkout
+            addToCartBtn.disabled = true;
+            addToCartBtn.textContent = 'ESTABELECIMENTO FECHADO';
+        } else {
+            // Estado de Aberto
+            checkoutBtn.disabled = false;
+            checkoutBtn.classList.remove('closed-state');
+            checkoutBtn.classList.add('bg-green-500', 'hover:bg-green-600', 'transform', 'hover:scale-[1.01]', 'active:scale-[0.98]');
+            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
+            // Restaura o botão do carrinho
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
+        }
+    }
 
     // --- FUNÇÕES DE LÓGICA E RENDERIZAÇÃO INICIAL ---
 
@@ -349,8 +406,8 @@ fieldset:disabled {
                     ${sobremesa.nome} (R$ ${sobremesa.precoUnitario.toFixed(2).replace('.', ',')})
                 </label>
                 <input type="number" id="${id}" name="sobremesa-qty" data-name="${sobremesa.nome}"
-                        min="0" value="0" class="drink-input" 
-                        onchange="updateSobremesasTotal(); renderCart();">
+                            min="0" value="0" class="drink-input" 
+                            onchange="updateSobremesasTotal(); renderCart();">
             </div>
         `;
     }
@@ -383,6 +440,9 @@ fieldset:disabled {
         
         // Inicializa a regra de bloqueio (se não houver prato, bloqueia APENAS bebidas)
         toggleDrinksAvailability(); 
+        
+        // NOVO: Aplica o estado de fechamento ao carregar
+        applyClosedState();
     }
     
     // Função para alternar visibilidade do campo de troco
@@ -408,10 +468,7 @@ fieldset:disabled {
             document.querySelectorAll('input[name="bebida-qty"]').forEach(input => input.value = 0);
             updateBebidasTotal();
             
-            // Só mostra a mensagem se tinha bebida selecionada antes
-            if (bebidas.length > 0) {
-               showModal('Adicione um *Prato de Macarrão* primeiro para selecionar Bebidas.', 'bg-yellow-600');
-            }
+            // Não precisa de modal, pois a restrição é visual
         }
     }
 
@@ -529,7 +586,7 @@ fieldset:disabled {
         const camarãoCheckbox = document.querySelector('input[name="acompPremium"][value="Camarão"]');
         
         if (!sizeRadio || !massaRadio || !molhoRadio || !queijoRadio) {
-            showModal('Por favor, selecione o **Tamanho**, a **Massa**, o **Molho** e o **Queijo**.', 'bg-red-500');
+            alert('Por favor, selecione o Tamanho, a Massa, o Molho e o Queijo.');
             return null;
         }
 
@@ -553,26 +610,33 @@ fieldset:disabled {
     }
 
     function addToCart() {
+        // Bloqueia o botão do carrinho se a loja estiver fechada
+        if (isClosed()) {
+            alert('🚨 O estabelecimento está FECHADO. Não é possível adicionar itens ao carrinho neste momento. Pedidos de Quarta-feira (12:00) até Domingo (14:00).');
+            return;
+        }
+        
         addToCartBtn.disabled = true; 
         addToCartBtn.textContent = 'Adicionando...';
         
         const item = getFormData();
         if (item) {
             cart.push(item);
-            showModal('Prato adicionado ao carrinho! Você pode montar outro.', 'bg-green-500');
+            alert('Prato adicionado ao carrinho! Você pode montar outro.');
             renderCart();
             resetForm();
             
-            // Chama a função para garantir que as bebidas estão liberadas
             toggleDrinksAvailability(); 
 
-            // NOVO E CORRIGIDO: Scroll para a seção da Sobremesa
             document.getElementById('dessert-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         setTimeout(() => {
-            addToCartBtn.disabled = false;
-            addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
+            // Verifica o estado de fechamento antes de reabilitar
+            if (!isClosed()) {
+                 addToCartBtn.disabled = false;
+                 addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
+            }
         } , 300); 
     }
     
@@ -581,7 +645,6 @@ fieldset:disabled {
         document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
-             // Força a seleção da primeira opção de queijo ao resetar, pois é obrigatório
              r.checked = index === 0; 
         });
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
@@ -602,7 +665,12 @@ fieldset:disabled {
 
         if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0) {
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
+            document.getElementById('cart-count').textContent = '0';
+            checkoutSection.style.display = 'none';
         } else {
+            document.getElementById('cart-count').textContent = cart.length;
+            checkoutSection.style.display = 'block';
+
             // 1. Renderiza os Pratos
             cart.forEach((item, index) => {
                 subtotalPratos += item.price;
@@ -663,9 +731,6 @@ fieldset:disabled {
             }
         }
 
-        checkoutSection.style.display = (cart.length > 0 || bebidas.length > 0 || sobremesas.length > 0) ? 'block' : 'none';
-
-        document.getElementById('cart-count').textContent = cart.length;
         document.getElementById('subtotal-display').textContent = `R$ ${subtotalPratos.toFixed(2).replace('.', ',')}`;
         updateFinalSummary();
     }
@@ -673,73 +738,50 @@ fieldset:disabled {
     function removeItem(index) {
         cart.splice(index, 1);
         renderCart();
-        
-        // Chama a função para bloquear as bebidas se o carrinho de pratos esvaziar
         toggleDrinksAvailability(); 
     }
 
     function updateFinalSummary() {
-        const subtotalPratos = cart.reduce((sum, item) => sum + item.price, 0);
-        const subtotalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
-        const subtotalSobremesas = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
+        const subtotalElement = document.getElementById('subtotal-display');
+        const subtotal = parseFloat(subtotalElement.textContent.replace('R$ ', '').replace(',', '.')) || 0;
         
-        const subtotalGeral = subtotalPratos + subtotalBebidas + subtotalSobremesas;
+        const selectedFee = parseFloat(document.querySelector('input[name="deliveryFee"]:checked').value) || 0;
+        
+        const finalTotal = subtotal + selectedFee;
 
-        const feeRadio = document.querySelector('input[name="deliveryFee"]:checked');
-        const deliveryFee = feeRadio ? parseFloat(feeRadio.value) : 2.00;
-        const finalTotalValue = subtotalGeral + deliveryFee;
-
-        document.getElementById('final-subtotal').textContent = `R$ ${subtotalGeral.toFixed(2).replace('.', ',')}`;
-        document.getElementById('final-fee').textContent = `R$ ${deliveryFee.toFixed(2).replace('.', ',')}`;
-        document.getElementById('final-total').textContent = `R$ ${finalTotalValue.toFixed(2).replace('.', ',')}`;
+        document.getElementById('final-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('final-fee').textContent = `R$ ${selectedFee.toFixed(2).replace('.', ',')}`;
+        document.getElementById('final-total').textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
     }
 
-    // --- FUNÇÕES DE CHECKOUT E WHATSAPP ---
-    
-    function validateCheckoutForm() {
-        const requiredIds = ['nome', 'telefone', 'endereco'];
-        let isValid = true;
+    function validateCheckout() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const endereco = document.getElementById('endereco').value.trim();
         
-        document.querySelectorAll('.input-style').forEach(input => {
-            input.classList.remove('border-red-500', 'ring-2', 'ring-red-500');
-        });
-
-        requiredIds.forEach(id => {
-            const input = document.getElementById(id);
-            if (!input.value.trim()) {
-                isValid = false;
-                input.classList.add('border-red-500', 'ring-2', 'ring-red-500');
-            }
-        });
-
-        if (!isValid) {
-            showModal('Por favor, preencha todos os campos obrigatórios (*).', 'bg-red-500');
+        if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0) {
+            alert('Seu carrinho está vazio. Adicione pelo menos um item para fazer o pedido.');
+            return false;
         }
 
-        return isValid;
-    }
-    
-    // Função para formatar o valor (retirar R$ e ,) e retornar float
-    function formatCurrencyToFloat(currencyString) {
-        if (!currencyString) return 0;
-        // Remove "R$", espaços, e troca vírgula por ponto
-        return parseFloat(currencyString.replace('R$', '').trim().replace(',', '.')) || 0;
+        if (!nome || !telefone || !endereco) {
+            alert('Por favor, preencha todos os campos obrigatórios (Nome, Telefone e Endereço) na seção de Dados de Entrega.');
+            document.getElementById('nome').focus();
+            return false;
+        }
+
+        return true;
     }
 
     function generateWhatsAppLink() {
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = 'Montando mensagem...';
-
-        if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0) {
-            showModal('Seu carrinho, bebidas e sobremesas estão vazios. Adicione um item antes de enviar.', 'bg-yellow-500');
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
+        // ** NOVO: BLOQUEIO DE HORÁRIO **
+        if (isClosed()) {
+            alert('🚨 O estabelecimento está FECHADO. Não é possível enviar o pedido neste momento. Pedidos de Quarta-feira (12:00) até Domingo (14:00).');
             return;
         }
+        // FIM DO BLOQUEIO
 
-        if (!validateCheckoutForm()) {
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
+        if (!validateCheckout()) {
             return;
         }
 
@@ -747,163 +789,87 @@ fieldset:disabled {
         const telefone = document.getElementById('telefone').value.trim();
         const endereco = document.getElementById('endereco').value.trim();
         const referencia = document.getElementById('referencia').value.trim();
-        const paymentMethod = document.getElementById('payment-method').value;
-        const trocoString = document.getElementById('troco').value.trim(); // Pega valor do troco
+        const paymentMethod = paymentMethodSelect.value;
+        const troco = paymentMethod === 'Dinheiro' ? document.getElementById('troco').value.trim() : '';
         
-        const subtotalPratos = cart.reduce((sum, item) => sum + item.price, 0);
-        const subtotalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
-        const subtotalSobremesas = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
-        
-        const totalUnidadesBebidas = bebidas.reduce((sum, item) => sum + item.qtd, 0);
-        const totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0);
+        const subtotal = document.getElementById('final-subtotal').textContent;
+        const taxa = document.getElementById('final-fee').textContent;
+        const totalFinal = document.getElementById('final-total').textContent;
 
-        const subtotalGeral = subtotalPratos + subtotalBebidas + subtotalSobremesas;
+        let message = `*🍕 Pedido Massa Nostra - Detalhes:*\n\n`;
 
-        const feeRadio = document.querySelector('input[name="deliveryFee"]:checked');
-        const deliveryFee = feeRadio ? parseFloat(feeRadio.value) : 2.00;
-        const finalTotalValue = subtotalGeral + deliveryFee;
-        const feeLabel = feeRadio.nextElementSibling.textContent.trim();
+        // 1. Dados Pessoais
+        message += `*Cliente:* ${nome}\n`;
+        message += `*Telefone:* ${telefone}\n`;
+        message += `*Endereço:* ${endereco}\n`;
+        if (referencia) message += `*Referência:* ${referencia}\n`;
+        message += "--------------------------------------\n";
 
-        // Lógica do Troco
-        let trocoText = "";
-        if (paymentMethod === 'Dinheiro') {
-            if (trocoString) {
-                const trocoValue = formatCurrencyToFloat(trocoString.replace('R$', ''));
-                if (trocoValue > finalTotalValue) {
-                    trocoText = `*Troco para:* R$ ${trocoValue.toFixed(2).replace('.', ',')}`;
-                } else {
-                    trocoText = `*Troco:* Vou pagar o valor exato (R$ ${finalTotalValue.toFixed(2).replace('.', ',')})`;
-                }
-            } else {
-                trocoText = `*Troco:* Vou pagar o valor exato (R$ ${finalTotalValue.toFixed(2).replace('.', ',')})`;
-            }
-        }
-
-        // Montagem da Mensagem do Pedido
-        let message = `🍝 Olá, Massa Nostra! Meu pedido de *${nome}* é o seguinte:\n\n`;
-        
-        // Adiciona Pratos
-        message += `--- ITENS (🍝 ${cart.length} prato(s)) ---\n`;
-        if (cart.length === 0) {
-            message += `_Nenhum prato montado._\n`;
-        }
+        // 2. Itens do Pedido (Pratos)
+        message += `*🍝 PRATOS DE MASSA (${cart.length} itens):*\n`;
         cart.forEach((item, index) => {
-            // Acompanhamentos Comuns em MAIÚSCULO e NEGITO
-            const acompText = item.acompanhamentos.length > 0 
-                ? item.acompanhamentos.join(', ').toUpperCase() 
-                : 'Nenhum';
-            
-            // Acompanhamento Premium em MAIÚSCULO e NEGITO
-            const camarãoText = item.premium ? 
-                `\n  Premium: *${item.premium.name.toUpperCase()}* (+ R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` 
-                : '';
-
-            message += `\n*PRATO #${index + 1} (${item.size}):*\n`;
-            // Massa em MAIÚSCULO e NEGITO
-            message += `  Massa: *${item.massa.toUpperCase()}*\n`;
-            // Molho em MAIÚSCULO e NEGITO
-            message += `  Molho: *${item.molho.toUpperCase()}*\n`;
-            message += `  Queijo: *${item.queijo}* (Incluso)\n`; 
-            // Acompanhamentos Comuns: em MAIÚSCULO e em NEGITO
-            message += `  Acompanhamentos Comuns: *${acompText}*`;
-            message += `${camarãoText}\n`;
-            // Observação em NEGITO
-            message += `  Obs: *${item.obs || 'Nenhuma'}*\n`;
-            message += `  Valor: R$ ${item.price.toFixed(2).replace('.', ',')}\n`;
+            const acompList = item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum';
+            const premiumText = item.premium ? `\n> 💰 Adicional Premium: ${item.premium.name} (+R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
+            message += `\n*#${index + 1} - ${item.massa} (${item.size})* - ${item.price.toFixed(2).replace('.', ',')}\n`;
+            message += `> Molho: ${item.molho}\n`;
+            message += `> Queijo: ${item.queijo}\n`;
+            message += `> Acompanhamentos: ${acompList}`;
+            message += premiumText;
+            if (item.obs) message += `\n> OBS: ${item.obs}`;
         });
-        
-        // Adiciona Sobremesas
-        message += `\n--- SOBREMESAS (🍰 ${totalUnidadesSobremesas} unidade(s)) ---\n`;
+        message += "\n--------------------------------------\n";
+
+        // 3. Sobremesas
         if (sobremesas.length > 0) {
-            message += `*Valor: R$ ${MENU.sobremesa.precoUnitario.toFixed(2).replace('.', ',')}/cada:*\n`;
+            const totalSobremesas = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
+            message += `*🍰 SOBREMESAS (${sobremesas.reduce((sum, item) => sum + item.qtd, 0)} Unidades) - R$ ${totalSobremesas.toFixed(2).replace('.', ',')}*\n`;
             sobremesas.forEach(s => {
-                // SOBREMESA EM MAIÚSCULO E NEGITO
-                message += `  - ${s.qtd}x *${s.nome.toUpperCase()}*\n`; 
+                message += `- ${s.qtd}x ${s.nome}\n`;
             });
-            message += `  _Total Sobremesas: R$ ${subtotalSobremesas.toFixed(2).replace('.', ',')}_\n`;
-        } else {
-            message += `_Nenhuma sobremesa adicionada._\n`;
+            message += "--------------------------------------\n";
         }
-
-        // Adiciona Bebidas com Quantidade
-        message += `\n--- BEBIDAS (🥤 ${totalUnidadesBebidas} lata(s)) ---\n`;
+        
+        // 4. Bebidas
         if (bebidas.length > 0) {
-            message += `*Latas ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')}/cada):*\n`;
+            const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
+            message += `*🥤 BEBIDAS (${bebidas.reduce((sum, item) => sum + item.qtd, 0)} Unidades) - R$ ${totalBebidas.toFixed(2).replace('.', ',')}*\n`;
             bebidas.forEach(b => {
-                message += `  - ${b.qtd}x ${b.nome}\n`;
+                message += `- ${b.qtd}x ${b.nome} (${MENU.bebidas.volume})\n`;
             });
-            message += `  _Total Bebidas: R$ ${subtotalBebidas.toFixed(2).replace('.', ',')}_\n`;
-        } else {
-            message += `_Nenhuma bebida adicionada._\n`;
+            message += "--------------------------------------\n";
         }
 
 
-        message += `\n--- RESUMO DA COMPRA ---\n`;
-        message += `*SUBTOTAL DOS ITENS:* R$ ${subtotalGeral.toFixed(2).replace('.', ',')}\n`;
-        message += `*TAXA DE ENTREGA:* ${feeLabel} (R$ ${deliveryFee.toFixed(2).replace('.', ',')})\n`;
-        message += `*TOTAL FINAL:* R$ ${finalTotalValue.toFixed(2).replace('.', ',')}\n\n`;
+        // 5. Total e Pagamento
+        message += `*RESUMO DO PAGAMENTO*\n`;
+        message += `Subtotal: ${subtotal}\n`;
+        message += `Taxa de Entrega: ${taxa}\n`;
+        message += `*TOTAL FINAL: ${totalFinal}*\n`;
+        message += `*Forma de Pgto:* ${paymentMethod}\n`;
         
-        message += `--- DADOS DO CLIENTE ---\n`;
-        message += `Nome: ${nome}\n`;
-        message += `Telefone: ${telefone}\n`;
-        message += `Endereço: ${endereco}\n`;
-        message += `Referência: ${referencia || 'Sem referência'}\n`;
-        
-        // Adiciona Dados de Pagamento e Pix/Troco
-        message += `Forma de Pagamento: *${paymentMethod}*\n`;
-        if (paymentMethod === 'Dinheiro') {
-            message += `${trocoText}\n\n`;
+        if (paymentMethod === 'Dinheiro' && troco) {
+            message += `*Troco para:* ${troco}\n`;
+        } else if (paymentMethod === 'Dinheiro') {
+             message += `*Troco para:* Valor Exato\n`;
+        } else if (paymentMethod === 'Pix') {
+            message += `\n*CHAVE PIX: ${MENU.pixData.key}* (Nome: ${MENU.pixData.name})\n`;
         }
-
-        // Adiciona as informações do PIX se o método for selecionado
-        if (paymentMethod === 'Pix') {
-            message += `\n🚨 *PAGAMENTO VIA PIX SELECIONADO:*\n`;
-            message += `  *Nome:* ${MENU.pixData.name}\n`;
-            message += `  *Chave:* ${MENU.pixData.key}\n\n`;
-        }
-
-        message += `Aguardamos a confirmação! Obrigado!`;
         
+        message += "\n*Por favor, confira os dados antes de enviar!*";
+
+        // Envio
         const encodedMessage = encodeURIComponent(message);
-        const whatsappLink = `https://wa.me/${MENU.whatsappNumber}?text=${encodedMessage}`;
+        const whatsappURL = `https://api.whatsapp.com/send?phone=${MENU.whatsappNumber}&text=${encodedMessage}`;
 
-        try {
-            const newWindow = window.open(whatsappLink, '_blank');
-            if (!newWindow || newWindow.closed || typeof newWindow.closed=='undefined') {
-                // Caso o navegador bloqueie a abertura
-                showModal('O bloqueador de pop-ups impediu a abertura do WhatsApp. Por favor, desabilite-o.', 'bg-yellow-500');
-            }
-        } catch (error) {
-            console.error("Erro ao tentar abrir o WhatsApp:", error);
-        } finally {
-            // Re-habilita o botão após a tentativa
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'ENVIAR PEDIDO VIA WHATSAPP';
-        }
+        window.open(whatsappURL, '_blank');
     }
 
-    // Função de Modal Simples (Para fins de teste e feedback ao usuário)
-    function showModal(message, bgColor) {
-        if (!document.getElementById('simple-modal')) {
-            const modal = document.createElement('div');
-            modal.id = 'simple-modal';
-            modal.className = 'fixed top-0 left-0 right-0 p-4 text-center text-white font-bold transition-all duration-300 transform translate-y-[-100%] z-50';
-            document.body.appendChild(modal);
-        }
-        
-        const modal = document.getElementById('simple-modal');
-        modal.className = `fixed top-0 left-0 right-0 p-4 text-center text-white font-bold transition-all duration-300 ${bgColor} z-50`;
-        modal.textContent = message;
-        modal.style.transform = 'translateY(0)';
-        
-        setTimeout(() => {
-            modal.style.transform = 'translateY(-100%)';
-        }, 3000);
-    }
-    
-    // Inicia a aplicação
-    document.addEventListener('DOMContentLoaded', setupUI);
+    // --- INICIALIZAÇÃO ---
+    window.onload = function() {
+        setupUI(); 
+        // Para garantir que o estado do botão seja sempre preciso:
+        // setInterval(applyClosedState, 60000); // Opcional: checa a cada 1 minuto
+    };
 </script>
-
 </body>
 </html>
