@@ -108,7 +108,7 @@ fieldset:disabled {
 
 
             <div class="space-y-2">
-                <label for="obs" class="block font-semibold text-gray-700 border-t pt-4">6. Observações (Ex: Queijo a parte, Sem cebolinha)</label>
+                <label for="obs" class="block font-semibold text-gray-700 border-t pt-4">6. Observações (Ex: Sem cebolinha)</label>
                 <input type="text" id="obs" class="input-style" placeholder="Digite aqui...">
                 <p class="text-2xl font-extrabold text-green-700 mt-4 text-right">
                     Preço do Item: <span id="item-price-display">R$ 24,90</span>
@@ -217,7 +217,7 @@ fieldset:disabled {
         massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
-            "Alho", "Alho Frito", "Azeitona", "Bacon", "Brócolis",
+            "Alho Frito", "Azeitona", "Bacon", "Brócolis",
             "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
