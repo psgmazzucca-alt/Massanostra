@@ -217,7 +217,7 @@ fieldset:disabled {
         massas: ["Penne", "Spaguetti", "Parafuso", "Fetutini"],
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
-            "Alho Frito", "Azeitona", "Bacon", "Brócolis",
+            "Alho Frito", "Azeitona", "Bacon", "Brócolis -ESGOTADO",
             "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
