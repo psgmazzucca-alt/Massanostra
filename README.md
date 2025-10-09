@@ -236,13 +236,18 @@ fieldset:disabled {
         lasanha: {
             nome: "Lasanha à Bolonhesa",
             precoUnitario: 26.90, 
-            descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, legumes frescos e temperos selecionados.",
+            descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, presunto, muçarela e temperos selecionados.",
         },
         bebidas: {
             opcoes: ["Coca-Cola", "Coca-Cola Zero", "Fanta", "Guaraná Antárctica", "Sprite", "Sprite Zero"],
             precoUnitario: 6.00, 
             volume: "350ml"
         },
+        // A SOBREMESA FOI REMOVIDA DO OBJETO MENU
+        // sobremesa: {
+        //     nome: "Palha Italiana Ninho com Nutella",
+        //     precoUnitario: 12.00,
+        // },
         // 👇 TROQUE AQUI PELO SEU NÚMERO REAL 👇
         whatsappNumber: "5517997381858", 
         pixData: { 
@@ -254,7 +259,7 @@ fieldset:disabled {
     // --- ESTADO GLOBAL ---
     let cart = []; 
     let bebidas = []; 
-    let lasanhas = []; 
+    let lasanhas = []; // sobremesas foi removido
     let currentItemPrice = MENU.tamanhos[0].preco;
     let premiumPrice = 0; 
     let selectedAcompanhamentos = 0;
@@ -276,6 +281,7 @@ fieldset:disabled {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
+    // sobremesaOptionsDiv, sobremesaTotalDisplay, sobremesaUnidadesDisplay removidos
     
     const bebidasFieldset = document.getElementById('bebidas-fieldset'); 
 
@@ -287,6 +293,7 @@ fieldset:disabled {
     const lasanhaTotalDisplay = document.getElementById('lasanha-total-display'); 
     const lasanhaUnidadesDisplay = document.getElementById('lasanha-unidades-display'); 
     const lasanhaDescriptionDiv = document.getElementById('lasanha-description'); 
+    // FIM NOVAS REFERÊNCIAS
 
 
     // --- LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
@@ -352,7 +359,7 @@ fieldset:disabled {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
-            // Apenas o tamanho 'P' será checado por padrão.
+            // Alteração: Apenas o tamanho 'P' será checado por padrão. Os demais (Massa, Molho, Queijo) não terão checked.
             let isChecked = false;
             if (isSizeOption && value === 'P') {
                 isChecked = true;
@@ -385,12 +392,11 @@ fieldset:disabled {
     }
 
     function renderQueijo() {
+        // Opção padrão removida. O cliente deve escolher.
         renderOptions(queijoOptionsDiv, 'queijo', MENU.queijos, 'radio', null);
     }
 
-    /**
-     * CORREÇÃO APLICADA: Adicionadas classes para forçar o texto da Lasanha a ficar em uma única linha.
-     */
+    // Renderizar Lasanha (Prato Individual)
     function renderLasanhas() {
         const lasanha = MENU.lasanha;
         const id = `qtd-${lasanha.nome.toLowerCase().replace(/\s/g, '-')}`;
@@ -400,7 +406,7 @@ fieldset:disabled {
 
         lasanhaOptionsDiv.innerHTML = `
             <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-md">
-                <label for="${id}" class="font-bold text-red-700 flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                <label for="${id}" class="font-bold text-red-700 flex-1">
                     ${lasanha.nome} (R$ ${lasanha.precoUnitario.toFixed(2).replace('.', ',')})
                 </label>
                 <input type="number" id="${id}" name="lasanha-qty" data-name="${lasanha.nome}"
@@ -426,17 +432,20 @@ fieldset:disabled {
         }).join('');
     }
 
+    // REMOVIDA: function renderSobremesas()
 
     function setupUI() {
         // Renderiza as seções do Prato
-        renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
-        renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio', null);
-        renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio', null);
+        renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true); // Padrão 'P' mantido
+        renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio', null); // Padrão removido
+        renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio', null); // Padrão removido
         renderAcompanhamentos();
-        renderQueijo(); 
+        renderQueijo(); // Padrão removido 
 
         // Renderiza a Lasanha
         renderLasanhas(); 
+        
+        // REMOVIDO: renderSobremesas();
         
         // Renderiza as bebidas com campo de quantidade
         renderBebidas();
@@ -450,6 +459,7 @@ fieldset:disabled {
         // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
+        // REMOVIDO: updateSobremesasTotal();
         updateLasanhasTotal(); 
         renderCart(); 
         
@@ -560,6 +570,8 @@ fieldset:disabled {
         updateFinalSummary(); 
     }
     
+    // REMOVIDA: function updateSobremesasTotal()
+
     // Função para atualizar o total de lasanhas
     function updateLasanhasTotal() {
         const input = document.querySelector('input[name="lasanha-qty"]');
@@ -600,7 +612,7 @@ fieldset:disabled {
         const camarãoCheckbox = document.querySelector('input[name="acompPremium"][value="Camarão"]');
         
         // Validação: checa se Massa, Molho e Queijo foram selecionados
-        if (!sizeRadio) { 
+        if (!sizeRadio) { // O tamanho deve ter sido selecionado pelo menos como 'P' (padrão)
              alert('Erro: O Tamanho do prato não foi definido. Recarregue a página.');
              return null;
         }
@@ -653,7 +665,7 @@ fieldset:disabled {
 
         setTimeout(() => {
             // Verifica o estado de fechamento antes de reabilitar
-            if (!isClosed() && getFormData() !== null) { 
+            if (!isClosed() && getFormData() !== null) { // Só reabilita se a validação passar
                 addToCartBtn.disabled = false;
                 addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
             }
@@ -681,13 +693,14 @@ fieldset:disabled {
     function renderCart() {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
+        // let totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0); // REMOVIDO
         let totalUnidadesLasanhas = lasanhas.reduce((sum, item) => sum + item.qtd, 0); 
 
         // Calcula o total de bebidas
         const totalBebidasCalculado = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
 
         // Verifica se o carrinho está vazio incluindo a lasanha e bebidas
-        if (cart.length === 0 && bebidas.length === 0 && lasanhas.length === 0) { 
+        if (cart.length === 0 && bebidas.length === 0 && lasanhas.length === 0) { // sobremesas removido
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
             document.getElementById('cart-count').textContent = '0';
             checkoutSection.style.display = 'none';
@@ -734,6 +747,9 @@ fieldset:disabled {
             });
 
 
+            // REMOVIDO: 3. Renderiza as Sobremesas
+            // sobremesas.forEach...
+
             // 3. Renderiza as Bebidas
             if (bebidas.length > 0) {
                 const li = document.createElement('li');
@@ -759,6 +775,8 @@ fieldset:disabled {
         renderCart();
         toggleDrinksAvailability(); 
     }
+
+    // REMOVIDO: function removeDessert()
     
     function removeLasanha() { 
         lasanhas = [];
@@ -781,6 +799,9 @@ fieldset:disabled {
         
         // 1. Subtotal Pratos (Monte Sua Massa)
         subtotal += cart.reduce((sum, item) => sum + item.price, 0);
+        
+        // REMOVIDO: 2. Subtotal Sobremesas
+        // subtotal += sobremesas.reduce...
         
         // 2. Subtotal Lasanhas
         subtotal += lasanhas.reduce((sum, item) => sum + (item.qtd * item.preco), 0);
@@ -856,6 +877,8 @@ fieldset:disabled {
                 msg.push(`- ${item.qtd}x ${item.nome} (R$ ${item.preco.toFixed(2).replace('.', ',')}/un)`);
             });
         }
+
+        // REMOVIDO: 3. Detalhes das Sobremesas
 
         // 3. Detalhes das Bebidas
         if (bebidas.length > 0) {
