@@ -131,16 +131,6 @@ fieldset:disabled {
                 Total de Unidades: <span id="lasanha-unidades-display">0</span> | Total: <span id="lasanha-total-display">R$ 0,00</span>
             </p>
         </section>
-        <section id="dessert-section" class="space-y-4 p-4 border border-purple-100 rounded-xl bg-purple-50">
-            <h2 class="section-title text-purple-800 border-purple-200">🍰 Adicionar Sobremesa</h2>
-            <div id="sobremesa-options" class="space-y-3">
-                </div>
-            <p id="sobremesa-count" class="text-sm font-medium text-gray-600 pt-2 border-t border-purple-200">
-                Total de Unidades: <span id="sobremesa-unidades-display">0</span> | Total: <span id="sobremesa-total-display">R$ 0,00</span>
-            </p>
-        </section>
-
-
         <section id="drinks-section" class="space-y-4 p-4 border border-blue-100 rounded-xl bg-blue-50">
             <fieldset id="bebidas-fieldset" disabled> <h2 class="section-title text-blue-800 border-blue-200">🥤 Adicionar Bebidas Geladas (R$ 6,00/cada)</h2>
                 <div id="bebidas-options" class="space-y-3">
@@ -245,7 +235,7 @@ fieldset:disabled {
         // ALTERADO: Preço e nome da seção para Prato Individual
         lasanha: {
             nome: "Lasanha à Bolonhesa",
-            precoUnitario: 26.90, // PREÇO ATUALIZADO
+            precoUnitario: 26.90, 
             descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, legumes frescos e temperos selecionados.",
         },
         bebidas: {
@@ -253,11 +243,11 @@ fieldset:disabled {
             precoUnitario: 6.00, 
             volume: "350ml"
         },
-        // Sobremesa
-        sobremesa: {
-            nome: "Palha Italiana Ninho com Nutella - ESGOTADO",
-            precoUnitario: 12.00,
-        },
+        // A SOBREMESA FOI REMOVIDA DO OBJETO MENU
+        // sobremesa: {
+        //     nome: "Palha Italiana Ninho com Nutella",
+        //     precoUnitario: 12.00,
+        // },
         // 👇 TROQUE AQUI PELO SEU NÚMERO REAL 👇
         whatsappNumber: "5517997381858", 
         pixData: { 
@@ -269,8 +259,7 @@ fieldset:disabled {
     // --- ESTADO GLOBAL ---
     let cart = []; 
     let bebidas = []; 
-    let sobremesas = []; 
-    let lasanhas = []; 
+    let lasanhas = []; // sobremesas foi removido
     let currentItemPrice = MENU.tamanhos[0].preco;
     let premiumPrice = 0; 
     let selectedAcompanhamentos = 0;
@@ -292,9 +281,7 @@ fieldset:disabled {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
-    const sobremesaOptionsDiv = document.getElementById('sobremesa-options');
-    const sobremesaTotalDisplay = document.getElementById('sobremesa-total-display');
-    const sobremesaUnidadesDisplay = document.getElementById('sobremesa-unidades-display');
+    // sobremesaOptionsDiv, sobremesaTotalDisplay, sobremesaUnidadesDisplay removidos
     
     const bebidasFieldset = document.getElementById('bebidas-fieldset'); 
 
@@ -309,7 +296,7 @@ fieldset:disabled {
     // FIM NOVAS REFERÊNCIAS
 
 
-    // --- NOVO: LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
+    // --- LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
 
     /**
      * Verifica se o estabelecimento está fechado.
@@ -445,22 +432,7 @@ fieldset:disabled {
         }).join('');
     }
 
-    // Renderizar Sobremesa
-    function renderSobremesas() {
-        const sobremesa = MENU.sobremesa;
-        const id = `qtd-${sobremesa.nome.toLowerCase().replace(/\s/g, '-')}`;
-
-        sobremesaOptionsDiv.innerHTML = `
-            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-md">
-                <label for="${id}" class="font-bold text-purple-700 flex-1">
-                    ${sobremesa.nome} (R$ ${sobremesa.precoUnitario.toFixed(2).replace('.', ',')})
-                </label>
-                <input type="number" id="${id}" name="sobremesa-qty" data-name="${sobremesa.nome}"
-                            min="0" value="0" class="drink-input" 
-                            onchange="updateSobremesasTotal(); renderCart();">
-            </div>
-        `;
-    }
+    // REMOVIDA: function renderSobremesas()
 
     function setupUI() {
         // Renderiza as seções do Prato
@@ -473,8 +445,7 @@ fieldset:disabled {
         // Renderiza a Lasanha
         renderLasanhas(); 
         
-        // Renderiza as sobremesas
-        renderSobremesas();
+        // REMOVIDO: renderSobremesas();
         
         // Renderiza as bebidas com campo de quantidade
         renderBebidas();
@@ -488,7 +459,7 @@ fieldset:disabled {
         // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
-        updateSobremesasTotal();
+        // REMOVIDO: updateSobremesasTotal();
         updateLasanhasTotal(); 
         renderCart(); 
         
@@ -599,34 +570,7 @@ fieldset:disabled {
         updateFinalSummary(); 
     }
     
-    // Função para atualizar o total de sobremesas
-    function updateSobremesasTotal() {
-        const input = document.querySelector('input[name="sobremesa-qty"]');
-        let qtd = parseInt(input.value) || 0;
-        
-        sobremesas = [];
-        let totalUnidades = 0;
-
-        if (qtd < 0) {
-            qtd = 0;
-            input.value = 0;
-        }
-        
-        if (qtd > 0) {
-            totalUnidades = qtd;
-            sobremesas.push({
-                nome: input.getAttribute('data-name'),
-                qtd: qtd
-            });
-        }
-        
-        const totalSobremesas = totalUnidades * MENU.sobremesa.precoUnitario;
-
-        sobremesaUnidadesDisplay.textContent = totalUnidades;
-        sobremesaTotalDisplay.textContent = `R$ ${totalSobremesas.toFixed(2).replace('.', ',')}`;
-        
-        updateFinalSummary();
-    }
+    // REMOVIDA: function updateSobremesasTotal()
 
     // Função para atualizar o total de lasanhas
     function updateLasanhasTotal() {
@@ -715,7 +659,8 @@ fieldset:disabled {
             
             toggleDrinksAvailability(); 
 
-            document.getElementById('dessert-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll agora vai para a seção de Lasanha/Bebidas
+            document.getElementById('lasanha-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         setTimeout(() => {
@@ -748,15 +693,14 @@ fieldset:disabled {
     function renderCart() {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
-        let totalUnidadesBebidas = 0;
-        let totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0);
+        // let totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0); // REMOVIDO
         let totalUnidadesLasanhas = lasanhas.reduce((sum, item) => sum + item.qtd, 0); 
 
         // Calcula o total de bebidas
         const totalBebidasCalculado = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
 
-        // Verifica se o carrinho está vazio incluindo a lasanha
-        if (cart.length === 0 && bebidas.length === 0 && sobremesas.length === 0 && lasanhas.length === 0) {
+        // Verifica se o carrinho está vazio incluindo a lasanha e bebidas
+        if (cart.length === 0 && bebidas.length === 0 && lasanhas.length === 0) { // sobremesas removido
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
             document.getElementById('cart-count').textContent = '0';
             checkoutSection.style.display = 'none';
@@ -803,20 +747,10 @@ fieldset:disabled {
             });
 
 
-            // 3. Renderiza as Sobremesas
-            sobremesas.forEach(item => {
-                subtotalPratos += item.qtd * MENU.sobremesa.precoUnitario;
-                const li = document.createElement('li');
-                li.className = 'p-3 border border-purple-200 bg-purple-50 rounded-lg shadow-sm';
-                li.innerHTML = `<p class="font-bold text-lg text-purple-800">${item.qtd}x ${item.nome}</p>
-                    <p class="text-sm italic text-gray-700">Total: R$ ${(item.qtd * MENU.sobremesa.precoUnitario).toFixed(2).replace('.', ',')}</p>
-                    <button onclick="removeDessert()" class="text-red-500 hover:text-red-700 text-sm font-semibold transition duration-150">
-                        Remover Sobremesa
-                    </button>`;
-                cartList.appendChild(li);
-            });
+            // REMOVIDO: 3. Renderiza as Sobremesas
+            // sobremesas.forEach...
 
-            // 4. Renderiza as Bebidas
+            // 3. Renderiza as Bebidas
             if (bebidas.length > 0) {
                 const li = document.createElement('li');
                 li.className = 'p-3 border border-blue-200 bg-blue-50 rounded-lg shadow-sm';
@@ -842,18 +776,14 @@ fieldset:disabled {
         toggleDrinksAvailability(); 
     }
 
-    function removeDessert() {
-        sobremesas = [];
-        document.querySelector('input[name="sobremesa-qty"]').value = 0;
-        updateSobremesasTotal();
-        renderCart();
-    }
+    // REMOVIDO: function removeDessert()
     
     function removeLasanha() { 
         lasanhas = [];
         document.querySelector('input[name="lasanha-qty"]').value = 0;
         updateLasanhasTotal();
         renderCart();
+        toggleDrinksAvailability(); 
     }
 
     function removeDrinks() {
@@ -870,13 +800,13 @@ fieldset:disabled {
         // 1. Subtotal Pratos (Monte Sua Massa)
         subtotal += cart.reduce((sum, item) => sum + item.price, 0);
         
-        // 2. Subtotal Sobremesas
-        subtotal += sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
+        // REMOVIDO: 2. Subtotal Sobremesas
+        // subtotal += sobremesas.reduce...
         
-        // 3. Subtotal Lasanhas
+        // 2. Subtotal Lasanhas
         subtotal += lasanhas.reduce((sum, item) => sum + (item.qtd * item.preco), 0);
         
-        // 4. Subtotal Bebidas
+        // 3. Subtotal Bebidas
         const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
         subtotal += totalBebidas;
 
@@ -927,7 +857,7 @@ fieldset:disabled {
             cart.forEach((item, index) => {
                 let itemMsg = `*${index + 1}. Massa ${item.size} (R$ ${item.price.toFixed(2).replace('.', ',')})*\n`;
                 // MACARRÃO, MOLHO E ACOMPANHAMENTOS EM NEGRITO
-                itemMsg += `   - Macarrão: *${item.massa}* c/ Molho *${item.molho}*, Queijo ${item.queijo}\n`;
+                itemMsg += `   - Base: *${item.massa}* c/ Molho *${item.molho}*, Queijo ${item.queijo}\n`;
                 itemMsg += `   - Acompanhamentos: *${item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum'}*\n`; 
                 if (item.premium) {
                     itemMsg += `   - *PREMIUM*: ${item.premium.name} (+R$ ${item.premium.cost.toFixed(2).replace('.', ',')})\n`;
@@ -948,16 +878,9 @@ fieldset:disabled {
             });
         }
 
-        // 3. Detalhes das Sobremesas
-        if (sobremesas.length > 0) {
-            const totalSobremesa = sobremesas.reduce((sum, item) => sum + (item.qtd * MENU.sobremesa.precoUnitario), 0);
-            msg.push(`\n*🍰 Sobremesas: (Total: R$ ${totalSobremesa.toFixed(2).replace('.', ',')})*`);
-            sobremesas.forEach(item => {
-                msg.push(`- ${item.qtd}x ${item.nome} (R$ ${MENU.sobremesa.precoUnitario.toFixed(2).replace('.', ',')}/un)`);
-            });
-        }
+        // REMOVIDO: 3. Detalhes das Sobremesas
 
-        // 4. Detalhes das Bebidas
+        // 3. Detalhes das Bebidas
         if (bebidas.length > 0) {
             const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
             msg.push(`\n*🥤 Bebidas (Total: R$ ${totalBebidas.toFixed(2).replace('.', ',')})*`);
