@@ -927,7 +927,7 @@ fieldset:disabled {
             cart.forEach((item, index) => {
                 let itemMsg = `*${index + 1}. Massa ${item.size} (R$ ${item.price.toFixed(2).replace('.', ',')})*\n`;
                 // MACARRÃO, MOLHO E ACOMPANHAMENTOS EM NEGRITO
-                itemMsg += `   - Base: *${item.massa}* c/ Molho *${item.molho}*, Queijo ${item.queijo}\n`;
+                itemMsg += `   - Macarrão: *${item.massa}* c/ Molho *${item.molho}*, Queijo ${item.queijo}\n`;
                 itemMsg += `   - Acompanhamentos: *${item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum'}*\n`; 
                 if (item.premium) {
                     itemMsg += `   - *PREMIUM*: ${item.premium.name} (+R$ ${item.premium.cost.toFixed(2).replace('.', ',')})\n`;
