@@ -236,7 +236,7 @@ fieldset:disabled {
         lasanha: {
             nome: "Lasanha à Bolonhesa",
             precoUnitario: 26.90, 
-            descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, legumes frescos e temperos selecionados.",
+            descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, presunto, muçarela, legumes frescos e temperos selecionados.",
         },
         bebidas: {
             opcoes: ["Coca-Cola", "Coca-Cola Zero", "Fanta", "Guaraná Antárctica", "Sprite", "Sprite Zero"],
