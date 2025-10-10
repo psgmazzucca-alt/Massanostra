@@ -57,7 +57,7 @@ fieldset:disabled {
 
 <div id="app" class="w-full max-w-xl bg-white shadow-2xl rounded-xl space-y-6 md:p-0">
     <header class="text-center relative italian-flag-gradient rounded-t-xl py-6 shadow-2xl">
-        <img src="https://i.postimg.cc/prk8G3cV/Imagem-do-Whats-App-de-2025-10-01-s-01-45-52-b1184833.jpg" 
+        <img src="https://i.postimg.cc/prk8G3cV/Imagem-do-Whats-App-de-2025-10-01-s-01-45-52-b1184834.jpg" 
              alt="Logo Massa Nostra" 
              class="w-40 h-40 object-cover mx-auto rounded-full mb-3 shadow-2xl border-4 border-white z-10 relative">
         <div class="px-2">
@@ -120,16 +120,10 @@ fieldset:disabled {
                 ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO
             </button>
         </section>
-
-        <section id="lasanha-section" class="space-y-4 p-4 border border-red-200 rounded-xl bg-red-100">
-            <h2 class="section-title text-red-700 border-red-300">🍝 Prato Individual: Lasanha à Bolonhesa</h2>
-            <div id="lasanha-options" class="space-y-3">
-                </div>
-            <p id="lasanha-description" class="text-sm italic text-gray-600">
-                </p>
-            <p id="lasanha-count" class="text-sm font-medium text-gray-700 pt-2 border-t border-red-300">
-                Total de Unidades: <span id="lasanha-unidades-display">0</span> | Total: <span id="lasanha-total-display">R$ 0,00</span>
-            </p>
+        
+        <section id="fixed-plates-section" class="space-y-4 p-4 border border-green-100 rounded-xl bg-green-50">
+            <h2 class="section-title text-green-800 border-green-200">🍽️ Pratos da Casa</h2>
+            <div id="pratos-fixos-options" class="space-y-3"></div>
         </section>
         <section id="drinks-section" class="space-y-4 p-4 border border-blue-100 rounded-xl bg-blue-50">
             <fieldset id="bebidas-fieldset" disabled> <h2 class="section-title text-blue-800 border-blue-200">🥤 Adicionar Bebidas Geladas (R$ 6,00/cada)</h2>
@@ -218,7 +212,7 @@ fieldset:disabled {
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
             "Alho Frito", "Azeitona", "Bacon", "Brócolis",
-            "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
+            "Calabresa", "Catupiry Original", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
@@ -232,36 +226,35 @@ fieldset:disabled {
             { id: 'P', nome: 'Pequeno', preco: 24.90, limite: 6 },
             { id: 'G', nome: 'Grande', preco: 32.90, limite: 8 }
         ],
-        // ALTERADO: Preço e nome da seção para Prato Individual
-        lasanha: {
-            nome: "Lasanha à Bolonhesa",
-            precoUnitario: 26.90, 
-            descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, presunto, muçarela e temperos selecionados.",
-        },
+        // ✨ NOVO PRATO FIXO ADICIONADO ✨
+        pratosFixos: [
+            {
+                nome: "Lasanha à Bolonhesa",
+                descricao: "Deliciosas camadas de massa fresca, recheadas com um molho bolonhesa artesanal preparado com carne moída, presunto, muçarela e temperos selecionados.",
+                preco: 26.90
+            }
+        ],
+        // SOBREMESA FOI REMOVIDA DESTE OBJETO
         bebidas: {
             opcoes: ["Coca-Cola", "Coca-Cola Zero", "Fanta", "Guaraná Antárctica", "Sprite", "Sprite Zero"],
-            precoUnitario: 6.00, 
+            precoUnitario: 6.00,
             volume: "350ml"
         },
-        // A SOBREMESA FOI REMOVIDA DO OBJETO MENU
-        // sobremesa: {
-        //     nome: "Palha Italiana Ninho com Nutella",
-        //     precoUnitario: 12.00,
-        // },
         // 👇 TROQUE AQUI PELO SEU NÚMERO REAL 👇
-        whatsappNumber: "5517997381858", 
-        pixData: { 
+        whatsappNumber: "5517997381858",
+        pixData: {
             name: "SUÉLEM CRISTINA MAESTRE MAZZUCCA",
-            key: "41756000867 (CPF)" 
+            key: "41756000867 (CPF)"
         }
     };
 
     // --- ESTADO GLOBAL ---
-    let cart = []; 
-    let bebidas = []; 
-    let lasanhas = []; // sobremesas foi removido
+    let cart = []; // Para pratos customizáveis
+    let bebidas = []; // Para bebidas
+    // SOBREMESAS REMOVIDAS
+    let pratosFixosQuantities = {}; // Para pratos fixos (Lasanha)
     let currentItemPrice = MENU.tamanhos[0].preco;
-    let premiumPrice = 0; 
+    let premiumPrice = 0;
     let selectedAcompanhamentos = 0;
     let maxAcompanhamentos = MENU.tamanhos[0].limite;
 
@@ -270,7 +263,8 @@ fieldset:disabled {
     const massaOptionsDiv = document.getElementById('massa-options');
     const molhoOptionsDiv = document.getElementById('molho-options');
     const acompOptionsDiv = document.getElementById('acomp-options');
-    const queijoOptionsDiv = document.getElementById('queijo-options'); 
+    const queijoOptionsDiv = document.getElementById('queijo-options');
+    const pratosFixosOptionsDiv = document.getElementById('pratos-fixos-options'); // NOVO
     const acompCounter = document.getElementById('acomp-counter');
     const itemPriceDisplay = document.getElementById('item-price-display');
     const cartList = document.getElementById('cart-list');
@@ -281,22 +275,15 @@ fieldset:disabled {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
-    // sobremesaOptionsDiv, sobremesaTotalDisplay, sobremesaUnidadesDisplay removidos
     
-    const bebidasFieldset = document.getElementById('bebidas-fieldset'); 
-
-    const trocoInputContainer = document.getElementById('troco-input-container'); 
+    // SOBREMESA REMOVIDA
+    
+    const bebidasFieldset = document.getElementById('bebidas-fieldset');
+    
+    const trocoInputContainer = document.getElementById('troco-input-container');
     const paymentMethodSelect = document.getElementById('payment-method');
 
-    // REFERÊNCIAS PARA LASANHA
-    const lasanhaOptionsDiv = document.getElementById('lasanha-options'); 
-    const lasanhaTotalDisplay = document.getElementById('lasanha-total-display'); 
-    const lasanhaUnidadesDisplay = document.getElementById('lasanha-unidades-display'); 
-    const lasanhaDescriptionDiv = document.getElementById('lasanha-description'); 
-    // FIM NOVAS REFERÊNCIAS
-
-
-    // --- LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
+    // --- NOVO: LÓGICA DE VERIFICAÇÃO DE HORÁRIO ---
 
     /**
      * Verifica se o estabelecimento está fechado.
@@ -359,13 +346,8 @@ fieldset:disabled {
                 ? `${option.id} (${option.nome}) (R$ ${option.preco.toFixed(2).replace('.', ',')}, Máx. ${option.limite} Acomp.)`
                 : option;
             
-            // Alteração: Apenas o tamanho 'P' será checado por padrão. Os demais (Massa, Molho, Queijo) não terão checked.
-            let isChecked = false;
-            if (isSizeOption && value === 'P') {
-                isChecked = true;
-            } else if (checkedValue !== null) {
-                isChecked = (value === checkedValue);
-            }
+            const isQueijoOption = name === 'queijo';
+            const isChecked = checkedValue ? (value === checkedValue) : (index === 0 && (!isSizeOption || isQueijoOption));
             
             return `
                 <label class="flex items-center p-3 bg-white rounded-lg shadow-md hover:bg-red-50 transition duration-150 flex-1 cursor-pointer acomp-option">
@@ -392,30 +374,9 @@ fieldset:disabled {
     }
 
     function renderQueijo() {
-        // Opção padrão removida. O cliente deve escolher.
-        renderOptions(queijoOptionsDiv, 'queijo', MENU.queijos, 'radio', null);
+        renderOptions(queijoOptionsDiv, 'queijo', MENU.queijos, 'radio', MENU.queijos[0]);
     }
-
-    // Renderizar Lasanha (Prato Individual)
-    function renderLasanhas() {
-        const lasanha = MENU.lasanha;
-        const id = `qtd-${lasanha.nome.toLowerCase().replace(/\s/g, '-')}`;
-
-        // Adiciona a descrição (na tag P que criamos no HTML)
-        lasanhaDescriptionDiv.textContent = lasanha.descricao;
-
-        lasanhaOptionsDiv.innerHTML = `
-            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-md">
-                <label for="${id}" class="font-bold text-red-700 flex-1">
-                    ${lasanha.nome} (R$ ${lasanha.precoUnitario.toFixed(2).replace('.', ',')})
-                </label>
-                <input type="number" id="${id}" name="lasanha-qty" data-name="${lasanha.nome}"
-                        min="0" value="0" class="drink-input" 
-                        onchange="updateLasanhasTotal(); renderCart();">
-            </div>
-        `;
-    }
-
+    
     function renderBebidas() {
         bebidasOptionsDiv.innerHTML = MENU.bebidas.opcoes.map(bebida => {
             const id = `qtd-${bebida.toLowerCase().replace(/\s/g, '-')}`;
@@ -431,21 +392,56 @@ fieldset:disabled {
             `;
         }).join('');
     }
+    
+    // ✨ NOVA FUNÇÃO: RENDERIZAR PRATOS FIXOS (LASANHA)
+    function renderPratosFixos() {
+        pratosFixosOptionsDiv.innerHTML = MENU.pratosFixos.map(prato => {
+            const id = `fixed-${prato.nome.toLowerCase().replace(/\s/g, '-')}`;
+            const qty = pratosFixosQuantities[prato.nome] || 0;
+            return `
+                <div class="p-3 bg-white rounded-lg shadow-md border border-green-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-green-700">${prato.nome}</h3>
+                        <p class="font-extrabold text-lg text-red-600">R$ ${prato.preco.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">${prato.descricao}</p>
+                    <div class="flex items-center justify-end space-x-2 border-t pt-2 mt-2">
+                        <button onclick="changeFixedItemQuantity('${prato.nome}', -1)" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg transition duration-150 active:scale-95 text-xl">-</button>
+                        <span id="${id}-qty" class="font-bold text-lg w-8 text-center">${qty}</span>
+                        <button onclick="changeFixedItemQuantity('${prato.nome}', 1)" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg transition duration-150 active:scale-95 text-xl">+</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
-    // REMOVIDA: function renderSobremesas()
+    // ✨ NOVA FUNÇÃO: ALTERAR QUANTIDADE DO PRATO FIXO
+    function changeFixedItemQuantity(name, change) {
+        pratosFixosQuantities[name] = pratosFixosQuantities[name] || 0;
+
+        let newQty = pratosFixosQuantities[name] + change;
+        if (newQty < 0) newQty = 0;
+        
+        pratosFixosQuantities[name] = newQty;
+        
+        const id = `fixed-${name.toLowerCase().replace(/\s/g, '-')}-qty`;
+        document.getElementById(id).textContent = newQty;
+
+        renderCart();
+    }
+    // FIM NOVAS FUNÇÕES
+
 
     function setupUI() {
         // Renderiza as seções do Prato
-        renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true); // Padrão 'P' mantido
-        renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio', null); // Padrão removido
-        renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio', null); // Padrão removido
+        renderOptions(sizeOptionsDiv, 'size', MENU.tamanhos, 'radio', 'P', true);
+        renderOptions(massaOptionsDiv, 'massa', MENU.massas, 'radio');
+        renderOptions(molhoOptionsDiv, 'molho', MENU.molhos, 'radio');
         renderAcompanhamentos();
-        renderQueijo(); // Padrão removido 
+        renderQueijo(); 
 
-        // Renderiza a Lasanha
-        renderLasanhas(); 
-        
-        // REMOVIDO: renderSobremesas();
+        // Renderiza os pratos fixos (Lasanha)
+        renderPratosFixos();
         
         // Renderiza as bebidas com campo de quantidade
         renderBebidas();
@@ -459,14 +455,13 @@ fieldset:disabled {
         // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
-        // REMOVIDO: updateSobremesasTotal();
-        updateLasanhasTotal(); 
+        // updateSobremesasTotal() REMOVIDA
         renderCart(); 
         
         // Inicializa a regra de bloqueio (se não houver prato, bloqueia APENAS bebidas)
         toggleDrinksAvailability(); 
         
-        // Aplica o estado de fechamento ao carregar
+        // NOVO: Aplica o estado de fechamento ao carregar
         applyClosedState();
     }
     
@@ -482,13 +477,13 @@ fieldset:disabled {
 
     // Função para habilitar/desabilitar SOMENTE Bebidas
     function toggleDrinksAvailability() {
-        // Apenas macarrão no carrinho conta para liberar os adicionais
-        const hasPasta = cart.length > 0 || lasanhas.length > 0; 
+        // Apenas itens no carrinho (customizados ou fixos) liberam os adicionais
+        const hasItems = cart.length > 0 || Object.values(pratosFixosQuantities).some(qty => qty > 0);
         
-        bebidasFieldset.disabled = !hasPasta; 
+        bebidasFieldset.disabled = !hasItems; 
 
         // Se desabilitou e o usuário tinha algo selecionado, zera a quantidade
-        if (!hasPasta) {
+        if (!hasItems) {
             // Zera Bebidas
             document.querySelectorAll('input[name="bebida-qty"]').forEach(input => input.value = 0);
             updateBebidasTotal();
@@ -570,38 +565,7 @@ fieldset:disabled {
         updateFinalSummary(); 
     }
     
-    // REMOVIDA: function updateSobremesasTotal()
-
-    // Função para atualizar o total de lasanhas
-    function updateLasanhasTotal() {
-        const input = document.querySelector('input[name="lasanha-qty"]');
-        let qtd = parseInt(input.value) || 0;
-        
-        lasanhas = [];
-        let totalUnidades = 0;
-
-        if (qtd < 0) {
-            qtd = 0;
-            input.value = 0;
-        }
-        
-        if (qtd > 0) {
-            totalUnidades = qtd;
-            lasanhas.push({
-                nome: input.getAttribute('data-name'),
-                qtd: qtd,
-                preco: MENU.lasanha.precoUnitario 
-            });
-        }
-        
-        const totalLasanhas = totalUnidades * MENU.lasanha.precoUnitario;
-
-        lasanhaUnidadesDisplay.textContent = totalUnidades;
-        lasanhaTotalDisplay.textContent = `R$ ${totalLasanhas.toFixed(2).replace('.', ',')}`;
-        
-        updateFinalSummary();
-    }
-
+    // updateSobremesasTotal REMOVIDA
 
     function getFormData() {
         const sizeRadio = document.querySelector('input[name="size"]:checked');
@@ -611,13 +575,8 @@ fieldset:disabled {
         const acompCheckboxes = document.querySelectorAll('input[name="acomp"]:checked');
         const camarãoCheckbox = document.querySelector('input[name="acompPremium"][value="Camarão"]');
         
-        // Validação: checa se Massa, Molho e Queijo foram selecionados
-        if (!sizeRadio) { // O tamanho deve ter sido selecionado pelo menos como 'P' (padrão)
-             alert('Erro: O Tamanho do prato não foi definido. Recarregue a página.');
-             return null;
-        }
-        if (!massaRadio || !molhoRadio || !queijoRadio) {
-            alert('🚨 Por favor, selecione o *TIPO DE MASSA*, o *MOLHO* e o *QUEIJO* antes de adicionar ao carrinho.');
+        if (!sizeRadio || !massaRadio || !molhoRadio || !queijoRadio) {
+            alert('Por favor, selecione o Tamanho, a Massa, o Molho e o Queijo.');
             return null;
         }
 
@@ -659,31 +618,29 @@ fieldset:disabled {
             
             toggleDrinksAvailability(); 
 
-            // Scroll agora vai para a seção de Lasanha/Bebidas
-            document.getElementById('lasanha-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('fixed-plates-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         setTimeout(() => {
             // Verifica o estado de fechamento antes de reabilitar
-            if (!isClosed() && getFormData() !== null) { // Só reabilita se a validação passar
-                addToCartBtn.disabled = false;
-                addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
+            if (!isClosed()) {
+                 addToCartBtn.disabled = false;
+                 addToCartBtn.textContent = 'ADICIONAR PRATO AO CARRINHO E MONTAR OUTRO';
             }
         } , 300); 
     }
     
     function resetForm() {
-        // Remove seleção de Massa, Molho e Queijo
+        // Reset do Prato
         document.querySelectorAll('input[name="massa"]').forEach(r => r.checked = false);
         document.querySelectorAll('input[name="molho"]').forEach(r => r.checked = false);
-        document.querySelectorAll('input[name="queijo"]').forEach(r => r.checked = false); 
-        
-        // Remove seleção de Acompanhamentos e Premium
+        document.querySelectorAll('input[name="queijo"]').forEach((r, index) => {
+             r.checked = index === 0; 
+        });
         document.querySelectorAll('input[name="acomp"]').forEach(cb => cb.checked = false);
         document.querySelectorAll('input[name="acompPremium"]').forEach(cb => cb.checked = false); 
         document.getElementById('obs').value = '';
 
-        // Mantém 'P' selecionado
         document.querySelector('input[name="size"][value="P"]').checked = true;
         updateLimitAndPrice(); 
     }
@@ -693,22 +650,22 @@ fieldset:disabled {
     function renderCart() {
         cartList.innerHTML = '';
         let subtotalPratos = 0;
-        // let totalUnidadesSobremesas = sobremesas.reduce((sum, item) => sum + item.qtd, 0); // REMOVIDO
-        let totalUnidadesLasanhas = lasanhas.reduce((sum, item) => sum + item.qtd, 0); 
+        let totalUnidadesFixos = 0;
+        let totalUnidadesBebidas = 0;
+        // SOBREMESAS REMOVIDAS
+        
+        const hasItems = cart.length > 0 || Object.values(pratosFixosQuantities).some(qty => qty > 0) || bebidas.length > 0;
 
-        // Calcula o total de bebidas
-        const totalBebidasCalculado = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
 
-        // Verifica se o carrinho está vazio incluindo a lasanha e bebidas
-        if (cart.length === 0 && bebidas.length === 0 && lasanhas.length === 0) { // sobremesas removido
+        if (!hasItems) {
             cartList.innerHTML = `<li id="empty-cart-message" class="text-gray-500 italic text-center">Nenhum item no carrinho.</li>`;
             document.getElementById('cart-count').textContent = '0';
             checkoutSection.style.display = 'none';
         } else {
-            document.getElementById('cart-count').textContent = cart.length + totalUnidadesLasanhas; 
+            document.getElementById('cart-count').textContent = cart.length + totalUnidadesFixos; // Conta pratos custom + pratos fixos
             checkoutSection.style.display = 'block';
 
-            // 1. Renderiza os Pratos "Monte Sua Massa"
+            // 1. Renderiza os Pratos Customizados
             cart.forEach((item, index) => {
                 subtotalPratos += item.price;
                 const li = document.createElement('li');
@@ -724,206 +681,187 @@ fieldset:disabled {
                             Remover
                         </button>
                     </div>
-                    <p class="text-sm text-gray-600">Molho: ${item.molho}, Queijo: ${item.queijo}</p>
-                    <p class="text-sm text-gray-600">Acompanhamentos: ${acompList}</p>
+                    <p class="text-sm text-gray-600">Molho: ${item.molho}</p>
+                    <p class="text-sm font-bold text-red-500">Queijo: ${item.queijo}</p>
+                    <p class="text-sm text-gray-600">Acompanhamentos Comuns: ${acompList}</p>
                     ${camarãoText}
-                    ${item.obs ? `<p class="text-sm italic text-gray-500">Obs: ${item.obs}</p>` : ''}
-                    <p class="text-lg font-bold text-green-700 text-right">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                    ${item.obs ? `<p class="text-sm font-italic text-blue-600">Obs: ${item.obs}</p>` : ''}
+                    <p class="text-lg font-extrabold text-red-700 text-right">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                 `;
                 cartList.appendChild(li);
             });
+            
+            // 2. Renderiza os Pratos Fixos (Lasanha)
+            Object.entries(pratosFixosQuantities).forEach(([name, qty]) => {
+                if (qty > 0) {
+                    const pratoFixo = MENU.pratosFixos.find(p => p.nome === name);
+                    if (pratoFixo) {
+                        const precoTotal = qty * pratoFixo.preco;
+                        subtotalPratos += precoTotal;
+                        totalUnidadesFixos += qty;
 
-            // 2. Renderiza as Lasanhas
-            lasanhas.forEach((item, index) => {
-                subtotalPratos += item.qtd * item.preco;
-                const li = document.createElement('li');
-                li.className = 'p-3 border border-red-200 bg-red-50 rounded-lg shadow-sm';
-                li.innerHTML = `<p class="font-bold text-lg text-red-800">${item.qtd}x Lasanha à Bolonhesa</p>
-                    <p class="text-sm italic text-gray-700">Prato Individual. Total: R$ ${(item.qtd * item.preco).toFixed(2).replace('.', ',')}</p>
-                    <button onclick="removeLasanha()" class="text-red-500 hover:text-red-700 text-sm font-semibold transition duration-150">
-                        Remover Todas as Lasanhas
-                    </button>`;
-                cartList.appendChild(li);
+                        const li = document.createElement('li');
+                        li.className = 'p-3 border border-green-300 bg-white rounded-lg shadow-sm space-y-1';
+                        
+                        li.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-green-800">🍝 Prato Fixo: ${name} (x${qty})</h3>
+                                <p class="text-lg font-extrabold text-red-600">R$ ${precoTotal.toFixed(2).replace('.', ',')}</p>
+                            </div>
+                            <p class="text-sm text-gray-600">${pratoFixo.descricao.substring(0, 100)}...</p>
+                            <button onclick="changeFixedItemQuantity('${name}', -${qty})" class="text-red-500 hover:text-red-700 text-sm font-semibold transition duration-150">
+                                Remover Todos
+                            </button>
+                        `;
+                        cartList.appendChild(li);
+                    }
+                }
             });
 
 
-            // REMOVIDO: 3. Renderiza as Sobremesas
-            // sobremesas.forEach...
-
             // 3. Renderiza as Bebidas
-            if (bebidas.length > 0) {
+            bebidas.forEach(item => {
+                totalUnidadesBebidas += item.qtd;
+                const total = item.qtd * MENU.bebidas.precoUnitario;
+                subtotalPratos += total;
+                
                 const li = document.createElement('li');
-                li.className = 'p-3 border border-blue-200 bg-blue-50 rounded-lg shadow-sm';
-                const drinksList = bebidas.map(d => `${d.qtd}x ${d.nome}`).join(', ');
-                li.innerHTML = `<p class="font-bold text-lg text-blue-800">🥤 Bebidas</p>
-                    <p class="text-sm text-gray-700">${drinksList}</p>
-                    <p class="text-sm italic text-gray-700">Total: R$ ${totalBebidasCalculado.toFixed(2).replace('.', ',')}</p>
-                    <button onclick="removeDrinks()" class="text-red-500 hover:text-red-700 text-sm font-semibold transition duration-150">
-                        Remover Bebidas
-                    </button>`;
+                li.className = 'p-3 border border-blue-200 bg-white rounded-lg shadow-sm flex justify-between items-center';
+                li.innerHTML = `
+                    <h3 class="font-bold text-blue-800">🥤 Bebida: ${item.nome} (x${item.qtd})</h3>
+                    <p class="text-lg font-extrabold text-blue-600">R$ ${total.toFixed(2).replace('.', ',')}</p>
+                `;
                 cartList.appendChild(li);
-            }
+            });
         }
         
-        // Atualiza subtotal principal (pratos + adicionais)
-        document.getElementById('subtotal-display').textContent = `R$ ${(subtotalPratos + totalBebidasCalculado).toFixed(2).replace('.', ',')}`;
+        document.getElementById('subtotal-display').textContent = `R$ ${subtotalPratos.toFixed(2).replace('.', ',')}`;
         updateFinalSummary();
+        
+        // Atualiza a disponibilidade das bebidas
+        toggleDrinksAvailability(); 
     }
 
     function removeItem(index) {
         cart.splice(index, 1);
         renderCart();
-        toggleDrinksAvailability(); 
     }
-
-    // REMOVIDO: function removeDessert()
-    
-    function removeLasanha() { 
-        lasanhas = [];
-        document.querySelector('input[name="lasanha-qty"]').value = 0;
-        updateLasanhasTotal();
-        renderCart();
-        toggleDrinksAvailability(); 
-    }
-
-    function removeDrinks() {
-        bebidas = [];
-        document.querySelectorAll('input[name="bebida-qty"]').forEach(input => input.value = 0);
-        updateBebidasTotal();
-        renderCart();
-    }
-
 
     function updateFinalSummary() {
-        let subtotal = 0;
-        
-        // 1. Subtotal Pratos (Monte Sua Massa)
-        subtotal += cart.reduce((sum, item) => sum + item.price, 0);
-        
-        // REMOVIDO: 2. Subtotal Sobremesas
-        // subtotal += sobremesas.reduce...
-        
-        // 2. Subtotal Lasanhas
-        subtotal += lasanhas.reduce((sum, item) => sum + (item.qtd * item.preco), 0);
-        
-        // 3. Subtotal Bebidas
-        const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
-        subtotal += totalBebidas;
+        const subtotalString = document.getElementById('subtotal-display').textContent.replace('R$', '').replace(',', '.').trim();
+        const subtotal = parseFloat(subtotalString) || 0;
 
-        // Taxa de entrega
-        const deliveryFeeElement = document.querySelector('input[name="deliveryFee"]:checked');
-        const deliveryFee = parseFloat(deliveryFeeElement ? deliveryFeeElement.value : 0);
-        
-        const totalFinal = subtotal + deliveryFee;
+        const selectedFeeRadio = document.querySelector('input[name="deliveryFee"]:checked');
+        const fee = parseFloat(selectedFeeRadio?.value || 0);
 
-        // Atualiza a seção de resumo final
+        const total = subtotal + fee;
+
         document.getElementById('final-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-        document.getElementById('final-fee').textContent = `R$ ${deliveryFee.toFixed(2).replace('.', ',')}`;
-        document.getElementById('final-total').textContent = `R$ ${totalFinal.toFixed(2).replace('.', ',')}`;
+        document.getElementById('final-fee').textContent = `R$ ${fee.toFixed(2).replace('.', ',')}`;
+        document.getElementById('final-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
     }
 
-    // Função para gerar o link do WhatsApp
+
+    // --- FUNÇÃO DE CHECKOUT ---
+
     function generateWhatsAppLink() {
         if (isClosed()) {
-            alert('🚨 O estabelecimento está FECHADO. Não é possível enviar pedidos neste momento.');
+            alert('🚨 O estabelecimento está FECHADO. Pedidos de Quarta-feira (12:00) até Domingo (14:00).');
             return;
         }
-
+        if (cart.length === 0 && Object.values(pratosFixosQuantities).every(qty => qty === 0) && bebidas.length === 0) {
+            alert('Seu carrinho está vazio. Adicione itens antes de enviar o pedido.');
+            return;
+        }
+        
+        // Validação de dados pessoais
         const nome = document.getElementById('nome').value.trim();
         const telefone = document.getElementById('telefone').value.trim();
         const endereco = document.getElementById('endereco').value.trim();
         const referencia = document.getElementById('referencia').value.trim();
-        const paymentMethod = paymentMethodSelect.value;
         const troco = document.getElementById('troco').value.trim();
-        const deliveryFeeElement = document.querySelector('input[name="deliveryFee"]:checked');
-        const deliveryFee = parseFloat(deliveryFeeElement ? deliveryFeeElement.value : 0);
+        const paymentMethod = document.getElementById('payment-method').value;
+        const total = document.getElementById('final-total').textContent.trim();
+        const subtotal = document.getElementById('final-subtotal').textContent.trim();
+        const fee = document.getElementById('final-fee').textContent.trim();
 
         if (!nome || !telefone || !endereco) {
-            alert('Por favor, preencha NOME, TELEFONE e ENDEREÇO para finalizar o pedido.');
+            alert('Por favor, preencha seu Nome, Telefone e Endereço para a entrega.');
             return;
         }
 
-        const subtotalDisplay = document.getElementById('final-subtotal').textContent;
-        const totalFinalDisplay = document.getElementById('final-total').textContent;
-
-        let msg = [];
-        msg.push(`*🧾 NOVO PEDIDO - MASSA NOSTRA POTY*`);
-        msg.push(`*👤 Cliente: ${nome}*`); 
-        msg.push(`----------------------------------`);
-
-        // 1. Detalhes dos Pratos "Monte Sua Massa"
-        if (cart.length > 0) {
-            msg.push(`\n*🍝 Monte Sua Massa (${cart.length} Prato${cart.length > 1 ? 's' : ''}):*`);
-            cart.forEach((item, index) => {
-                let itemMsg = `*${index + 1}. Massa ${item.size} (R$ ${item.price.toFixed(2).replace('.', ',')})*\n`;
-                // MACARRÃO, MOLHO E ACOMPANHAMENTOS EM NEGRITO
-                itemMsg += `   - Base: *${item.massa}* c/ Molho *${item.molho}*, Queijo ${item.queijo}\n`;
-                itemMsg += `   - Acompanhamentos: *${item.acompanhamentos.length > 0 ? item.acompanhamentos.join(', ') : 'Nenhum'}*\n`; 
-                if (item.premium) {
-                    itemMsg += `   - *PREMIUM*: ${item.premium.name} (+R$ ${item.premium.cost.toFixed(2).replace('.', ',')})\n`;
-                }
-                if (item.obs) {
-                    itemMsg += `   - Obs: ${item.obs}\n`;
-                }
-                msg.push(itemMsg.trim());
-            });
-        }
+        let message = `*🍕 NOVO PEDIDO - MASSA NOSTRA POTY 🍝*\n\n`;
+        message += `*Cliente:* ${nome}\n`;
+        message += `*Telefone:* ${telefone}\n`;
+        message += `*Endereço:* ${endereco}\n`;
+        message += `*Ponto de Ref.:* ${referencia || 'Não informado'}\n\n`;
         
-        // 2. Detalhes da Lasanha
-        if (lasanhas.length > 0) {
-            const totalLasanha = lasanhas.reduce((sum, item) => sum + (item.qtd * item.preco), 0);
-            msg.push(`\n*🍝 Lasanha (Prato Individual): (Total: R$ ${totalLasanha.toFixed(2).replace('.', ',')})*`);
-            lasanhas.forEach(item => {
-                msg.push(`- ${item.qtd}x ${item.nome} (R$ ${item.preco.toFixed(2).replace('.', ',')}/un)`);
-            });
-        }
+        message += `*--- ITENS DO PEDIDO (${cart.length + Object.values(pratosFixosQuantities).reduce((sum, qty) => sum + qty, 0)} Total) ---*\n\n`;
 
-        // REMOVIDO: 3. Detalhes das Sobremesas
+        // 1. Itens Customizados
+        cart.forEach((item, index) => {
+            // ALTERAÇÃO AQUI: Formatação da lista de acompanhamentos com negrito (***)
+            const acompList = item.acompanhamentos.length > 0 ? item.acompanhamentos.map(acomp => `*${acomp}*`).join(', ') : 'Nenhum';
+            const premiumText = item.premium ? ` (+ *${item.premium.name} Premium* - R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
+            
+            message += `*#${index + 1} - Massa ${item.size} (R$ ${item.price.toFixed(2).replace('.', ',')})*\n`;
+            // Aplicação de Negrito na Massa, Molho e Queijo
+            message += `> Massa: *${item.massa}*\n`;
+            message += `> Molho: *${item.molho}*\n`;
+            message += `> Queijo: *${item.queijo}*\n`;
+            message += `> Acompanhamentos: ${acompList}${premiumText}\n`;
+            if (item.obs) message += `> Obs: ${item.obs}\n`;
+            message += `\n`;
+        });
+        
+        // 2. Pratos Fixos (Lasanha)
+        Object.entries(pratosFixosQuantities).forEach(([name, qty]) => {
+            if (qty > 0) {
+                 const pratoFixo = MENU.pratosFixos.find(p => p.nome === name);
+                 const totalPrato = (qty * pratoFixo.preco).toFixed(2).replace('.', ',');
+                 message += `*🍽️ Prato Fixo: ${name} (x${qty})*\n`;
+                 message += `> Total do Item: R$ ${totalPrato}\n`;
+                 message += `\n`;
+            }
+        });
 
-        // 3. Detalhes das Bebidas
+
+        // 3. Bebidas
         if (bebidas.length > 0) {
-            const totalBebidas = bebidas.reduce((sum, item) => sum + (item.qtd * MENU.bebidas.precoUnitario), 0);
-            msg.push(`\n*🥤 Bebidas (Total: R$ ${totalBebidas.toFixed(2).replace('.', ',')})*`);
+            message += `*🥤 Bebidas:*\n`;
             bebidas.forEach(item => {
-                msg.push(`- ${item.qtd}x ${item.nome}`);
+                const precoUnitario = MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',');
+                message += `> ${item.qtd}x ${item.nome} (R$ ${precoUnitario} cada)\n`;
             });
+            message += `\n`;
         }
 
-        msg.push(`\n----------------------------------`);
-        msg.push(`*RESUMO DO PEDIDO:*`);
-        msg.push(`Subtotal: ${subtotalDisplay}`);
-        msg.push(`Taxa de Entrega: R$ ${deliveryFee.toFixed(2).replace('.', ',')}`);
-        msg.push(`*TOTAL FINAL: ${totalFinalDisplay}*`);
-        msg.push(`----------------------------------`);
+        // 4. Resumo Financeiro
+        message += `*--- RESUMO FINANCEIRO ---*\n`;
+        message += `*SUBTOTAL (Itens):* ${subtotal}\n`;
+        message += `*Taxa de Entrega:* ${fee}\n`;
+        message += `*TOTAL FINAL:* ${total}\n\n`;
 
-        // 5. Dados de Entrega e Pagamento
-        msg.push(`\n*📍 DADOS DE ENTREGA:*`);
-        msg.push(`Nome: ${nome}`);
-        msg.push(`Telefone: ${telefone}`);
-        msg.push(`Endereço: ${endereco}`);
-        if (referencia) {
-            msg.push(`Referência: ${referencia}`);
-        }
-        msg.push(`\n*💰 PAGAMENTO:*`);
-        msg.push(`Forma: ${paymentMethod}`);
-
+        // 5. Pagamento e Troco
+        message += `*FORMA DE PAGAMENTO:* ${paymentMethod}\n`;
         if (paymentMethod === 'Dinheiro' && troco) {
-            msg.push(`Precisa de *TROCO PARA*: ${troco}`);
+            message += `*Precisa de TROCO para:* R$ ${troco}\n`;
+        } else if (paymentMethod === 'Dinheiro') {
+            message += `*Troco:* Não informado (Pagar valor exato)\n`;
         } else if (paymentMethod === 'Pix') {
-             msg.push(`*PIX* será enviado após a confirmação. Chave: ${MENU.pixData.key} (Nome: ${MENU.pixData.name})`);
-        } else if (paymentMethod.includes('Cartao')) {
-            msg.push(`Pagamento será realizado na máquina (Levar máquina de ${paymentMethod.replace('Cartao-', '')})`);
+            message += `*Dados Pix:* ${MENU.pixData.key} (${MENU.pixData.name})\n`;
         }
-
-
-        const finalMessage = encodeURIComponent(msg.join('\n'));
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=${MENU.whatsappNumber}&text=${finalMessage}`;
         
-        window.open(whatsappUrl, '_blank');
+        message += `\n_Aguarde a confirmação da entrega. Obrigado!_`;
+
+        // Gera o link do WhatsApp
+        const waLink = `https://api.whatsapp.com/send?phone=${MENU.whatsappNumber}&text=${encodeURIComponent(message)}`;
+        
+        window.open(waLink, '_blank');
     }
 
-    // Inicializa a UI quando a página carregar
-    document.addEventListener('DOMContentLoaded', setupUI);
+    // Inicializa a aplicação
+    setupUI();
 </script>
 </body>
 </html>
