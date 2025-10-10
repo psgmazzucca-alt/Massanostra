@@ -212,7 +212,7 @@ fieldset:disabled {
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
             "Alho Frito", "Azeitona", "Bacon", "Brócolis",
-            "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
+            "Calabresa", "Catupiry Original", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
