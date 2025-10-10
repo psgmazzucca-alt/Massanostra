@@ -212,7 +212,7 @@ fieldset:disabled {
         molhos: ["Bolonhesa", "Branco", "Rosé", "Sugo"],
         acompanhamentos: [
             "Alho Frito", "Azeitona", "Bacon", "Brócolis",
-            "Calabresa", "Catupiry Original", "Cebola", "Cheddar", "Champignon",
+            "Calabresa", "Catupiry", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
             "Presunto", "Salsicha", "Tomate", "Tomate Seco",
             "Uva Passa"
@@ -250,9 +250,8 @@ fieldset:disabled {
 
     // --- ESTADO GLOBAL ---
     let cart = []; // Para pratos customizáveis
-    let bebidas = []; // Para bebidas
-    // SOBREMESAS REMOVIDAS
     let pratosFixosQuantities = {}; // Para pratos fixos (Lasanha)
+    let bebidasQuantities = {}; // ✨ NOVO: Para quantidades de bebidas
     let currentItemPrice = MENU.tamanhos[0].preco;
     let premiumPrice = 0;
     let selectedAcompanhamentos = 0;
@@ -264,7 +263,7 @@ fieldset:disabled {
     const molhoOptionsDiv = document.getElementById('molho-options');
     const acompOptionsDiv = document.getElementById('acomp-options');
     const queijoOptionsDiv = document.getElementById('queijo-options');
-    const pratosFixosOptionsDiv = document.getElementById('pratos-fixos-options'); // NOVO
+    const pratosFixosOptionsDiv = document.getElementById('pratos-fixos-options'); 
     const acompCounter = document.getElementById('acomp-counter');
     const itemPriceDisplay = document.getElementById('item-price-display');
     const cartList = document.getElementById('cart-list');
@@ -275,8 +274,6 @@ fieldset:disabled {
     const bebidasOptionsDiv = document.getElementById('bebidas-options');
     const bebidasTotalDisplay = document.getElementById('bebidas-total-display');
     const bebidasUnidadesDisplay = document.getElementById('bebidas-unidades-display');
-    
-    // SOBREMESA REMOVIDA
     
     const bebidasFieldset = document.getElementById('bebidas-fieldset');
     
@@ -379,21 +376,42 @@ fieldset:disabled {
     
     function renderBebidas() {
         bebidasOptionsDiv.innerHTML = MENU.bebidas.opcoes.map(bebida => {
-            const id = `qtd-${bebida.toLowerCase().replace(/\s/g, '-')}`;
+            const id = `qty-bebida-${bebida.toLowerCase().replace(/\s/g, '-')}`;
+            const qty = bebidasQuantities[bebida] || 0; 
+            
             return `
                 <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-md">
-                    <label for="${id}" class="font-medium text-gray-700 flex-1">
+                    <label class="font-medium text-gray-700 flex-1">
                         ${bebida} ${MENU.bebidas.volume} (R$ ${MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',')})
                     </label>
-                    <input type="number" id="${id}" name="bebida-qty" data-name="${bebida}"
-                            min="0" value="0" class="drink-input" 
-                            onchange="updateBebidasTotal(); renderCart();">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeDrinkQuantity('${bebida}', -1)" class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg transition duration-150 active:scale-95 text-xl">-</button>
+                        <span id="${id}" class="font-bold text-lg w-8 text-center">${qty}</span>
+                        <button onclick="changeDrinkQuantity('${bebida}', 1)" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg transition duration-150 active:scale-95 text-xl">+</button>
+                    </div>
                 </div>
             `;
         }).join('');
     }
     
-    // ✨ NOVA FUNÇÃO: RENDERIZAR PRATOS FIXOS (LASANHA)
+    // ✨ NOVA FUNÇÃO: GERENCIAR QUANTIDADE DE BEBIDA
+    function changeDrinkQuantity(name, change) {
+        bebidasQuantities[name] = bebidasQuantities[name] || 0;
+
+        let newQty = bebidasQuantities[name] + change;
+        if (newQty < 0) newQty = 0;
+        
+        bebidasQuantities[name] = newQty;
+        
+        const id = `qty-bebida-${name.toLowerCase().replace(/\s/g, '-')}`;
+        document.getElementById(id).textContent = newQty;
+
+        updateBebidasTotal();
+        renderCart();
+    }
+
+
+    // ✨ FUNÇÃO: RENDERIZAR PRATOS FIXOS (LASANHA)
     function renderPratosFixos() {
         pratosFixosOptionsDiv.innerHTML = MENU.pratosFixos.map(prato => {
             const id = `fixed-${prato.nome.toLowerCase().replace(/\s/g, '-')}`;
@@ -415,7 +433,7 @@ fieldset:disabled {
         }).join('');
     }
 
-    // ✨ NOVA FUNÇÃO: ALTERAR QUANTIDADE DO PRATO FIXO
+    // ✨ FUNÇÃO: ALTERAR QUANTIDADE DO PRATO FIXO
     function changeFixedItemQuantity(name, change) {
         pratosFixosQuantities[name] = pratosFixosQuantities[name] || 0;
 
@@ -443,7 +461,7 @@ fieldset:disabled {
         // Renderiza os pratos fixos (Lasanha)
         renderPratosFixos();
         
-        // Renderiza as bebidas com campo de quantidade
+        // Renderiza as bebidas com botões +/-
         renderBebidas();
 
         // Adiciona Listeners
@@ -455,7 +473,6 @@ fieldset:disabled {
         // Inicializa
         updateLimitAndPrice();
         updateBebidasTotal();
-        // updateSobremesasTotal() REMOVIDA
         renderCart(); 
         
         // Inicializa a regra de bloqueio (se não houver prato, bloqueia APENAS bebidas)
@@ -485,7 +502,8 @@ fieldset:disabled {
         // Se desabilitou e o usuário tinha algo selecionado, zera a quantidade
         if (!hasItems) {
             // Zera Bebidas
-            document.querySelectorAll('input[name="bebida-qty"]').forEach(input => input.value = 0);
+            bebidasQuantities = {};
+            renderBebidas(); // Atualiza o DOM para mostrar 0
             updateBebidasTotal();
         }
     }
@@ -535,29 +553,16 @@ fieldset:disabled {
     }
 
     function updateBebidasTotal() {
-        const inputs = document.querySelectorAll('input[name="bebida-qty"]');
         let totalUnidades = 0;
+        let totalBebidas = 0;
         
-        bebidas = []; 
-
-        inputs.forEach(input => {
-            let qtd = parseInt(input.value) || 0;
-            
-            if (qtd < 0) {
-                qtd = 0;
-                input.value = 0;
-            }
-            
+        // Calcula o total e o número de unidades a partir do objeto bebidasQuantities
+        Object.entries(bebidasQuantities).forEach(([nome, qtd]) => {
             if (qtd > 0) {
                 totalUnidades += qtd;
-                bebidas.push({
-                    nome: input.getAttribute('data-name'),
-                    qtd: qtd
-                });
+                totalBebidas += qtd * MENU.bebidas.precoUnitario;
             }
         });
-        
-        const totalBebidas = totalUnidades * MENU.bebidas.precoUnitario;
 
         bebidasUnidadesDisplay.textContent = totalUnidades;
         bebidasTotalDisplay.textContent = `R$ ${totalBebidas.toFixed(2).replace('.', ',')}`;
@@ -565,8 +570,6 @@ fieldset:disabled {
         updateFinalSummary(); 
     }
     
-    // updateSobremesasTotal REMOVIDA
-
     function getFormData() {
         const sizeRadio = document.querySelector('input[name="size"]:checked');
         const massaRadio = document.querySelector('input[name="massa"]:checked');
@@ -652,9 +655,12 @@ fieldset:disabled {
         let subtotalPratos = 0;
         let totalUnidadesFixos = 0;
         let totalUnidadesBebidas = 0;
-        // SOBREMESAS REMOVIDAS
         
-        const hasItems = cart.length > 0 || Object.values(pratosFixosQuantities).some(qty => qty > 0) || bebidas.length > 0;
+        // Verifica se há itens customizados, fixos ou bebidas
+        const hasCustomItems = cart.length > 0;
+        const hasFixedItems = Object.values(pratosFixosQuantities).some(qty => qty > 0);
+        const hasDrinks = Object.values(bebidasQuantities).some(qty => qty > 0);
+        const hasItems = hasCustomItems || hasFixedItems || hasDrinks;
 
 
         if (!hasItems) {
@@ -662,7 +668,7 @@ fieldset:disabled {
             document.getElementById('cart-count').textContent = '0';
             checkoutSection.style.display = 'none';
         } else {
-            document.getElementById('cart-count').textContent = cart.length + totalUnidadesFixos; // Conta pratos custom + pratos fixos
+            document.getElementById('cart-count').textContent = cart.length + Object.values(pratosFixosQuantities).reduce((sum, qty) => sum + qty, 0); 
             checkoutSection.style.display = 'block';
 
             // 1. Renderiza os Pratos Customizados
@@ -720,18 +726,20 @@ fieldset:disabled {
 
 
             // 3. Renderiza as Bebidas
-            bebidas.forEach(item => {
-                totalUnidadesBebidas += item.qtd;
-                const total = item.qtd * MENU.bebidas.precoUnitario;
-                subtotalPratos += total;
-                
-                const li = document.createElement('li');
-                li.className = 'p-3 border border-blue-200 bg-white rounded-lg shadow-sm flex justify-between items-center';
-                li.innerHTML = `
-                    <h3 class="font-bold text-blue-800">🥤 Bebida: ${item.nome} (x${item.qtd})</h3>
-                    <p class="text-lg font-extrabold text-blue-600">R$ ${total.toFixed(2).replace('.', ',')}</p>
-                `;
-                cartList.appendChild(li);
+            Object.entries(bebidasQuantities).forEach(([name, qtd]) => {
+                if (qtd > 0) {
+                    totalUnidadesBebidas += qtd;
+                    const total = qtd * MENU.bebidas.precoUnitario;
+                    subtotalPratos += total;
+                    
+                    const li = document.createElement('li');
+                    li.className = 'p-3 border border-blue-200 bg-white rounded-lg shadow-sm flex justify-between items-center';
+                    li.innerHTML = `
+                        <h3 class="font-bold text-blue-800">🥤 Bebida: ${name} (x${qtd})</h3>
+                        <p class="text-lg font-extrabold text-blue-600">R$ ${total.toFixed(2).replace('.', ',')}</p>
+                    `;
+                    cartList.appendChild(li);
+                }
             });
         }
         
@@ -769,7 +777,11 @@ fieldset:disabled {
             alert('🚨 O estabelecimento está FECHADO. Pedidos de Quarta-feira (12:00) até Domingo (14:00).');
             return;
         }
-        if (cart.length === 0 && Object.values(pratosFixosQuantities).every(qty => qty === 0) && bebidas.length === 0) {
+        
+        const hasFixedItems = Object.values(pratosFixosQuantities).some(qty => qty > 0);
+        const hasDrinks = Object.values(bebidasQuantities).some(qty => qty > 0);
+        
+        if (cart.length === 0 && !hasFixedItems && !hasDrinks) {
             alert('Seu carrinho está vazio. Adicione itens antes de enviar o pedido.');
             return;
         }
@@ -800,12 +812,11 @@ fieldset:disabled {
 
         // 1. Itens Customizados
         cart.forEach((item, index) => {
-            // ALTERAÇÃO AQUI: Formatação da lista de acompanhamentos com negrito (***)
+            // Formatação: Acompanhamentos, Massa, Molho e Queijo em negrito.
             const acompList = item.acompanhamentos.length > 0 ? item.acompanhamentos.map(acomp => `*${acomp}*`).join(', ') : 'Nenhum';
             const premiumText = item.premium ? ` (+ *${item.premium.name} Premium* - R$ ${item.premium.cost.toFixed(2).replace('.', ',')})` : '';
             
             message += `*#${index + 1} - Massa ${item.size} (R$ ${item.price.toFixed(2).replace('.', ',')})*\n`;
-            // Aplicação de Negrito na Massa, Molho e Queijo
             message += `> Massa: *${item.massa}*\n`;
             message += `> Molho: *${item.molho}*\n`;
             message += `> Queijo: *${item.queijo}*\n`;
@@ -827,11 +838,13 @@ fieldset:disabled {
 
 
         // 3. Bebidas
-        if (bebidas.length > 0) {
+        if (hasDrinks) {
             message += `*🥤 Bebidas:*\n`;
-            bebidas.forEach(item => {
-                const precoUnitario = MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',');
-                message += `> ${item.qtd}x ${item.nome} (R$ ${precoUnitario} cada)\n`;
+            Object.entries(bebidasQuantities).forEach(([name, qtd]) => {
+                if (qtd > 0) {
+                    const precoUnitario = MENU.bebidas.precoUnitario.toFixed(2).replace('.', ',');
+                    message += `> ${qtd}x ${name} (R$ ${precoUnitario} cada)\n`;
+                }
             });
             message += `\n`;
         }
