@@ -214,7 +214,7 @@ fieldset:disabled {
             "Alho Frito", "Azeitona", "Bacon", "Brócolis",
             "Calabresa", "Catupiry Original", "Cebola", "Cheddar", "Champignon",
             "Ervilha", "Frango", "Milho", "Palmito", "Pimentão",
-            "Presunto", "Salsicha", "Tomate", "Tomate Seco",
+            "Presunto", "Salsicha", "Tomate Seco",
             "Uva Passa"
         ],
         // Opções de Queijo
